@@ -12,9 +12,7 @@ from .ProjectsCLass import Project
 import os
 import glob
 import sys
-sys.path.insert(0, r'C:/Users/Samuel/Documents/Github/LabNY')
-sys.path.insert(0, r'C:/Users/Samuel/Documents/Github/LabNY/ny_lab')
-import ny_lab
+
 
 
 
@@ -38,7 +36,10 @@ class ProjectManager(Project):
         
         
     def initialize_a_project(self, project, gui) :
+        import ny_lab
         if project=='LabNY':
+            sys.path.insert(0, r'C:/Users/Samuel/Documents/Github/LabNY')
+            sys.path.insert(0, r'C:/Users/Samuel/Documents/Github/LabNY/ny_lab')
             self.lab=ny_lab.RunNYLab(gui)
             return self.lab
             
