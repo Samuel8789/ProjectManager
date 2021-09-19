@@ -21,17 +21,19 @@ import git
 from git import Repo
 from github import Github
 
-class Project:
+class Project():
     # get github info
-    g = Github(open(r'C:\Users\sp3660\Documents\Github\GitHubToken.txt', 'r').read())
-    u = g.get_user()
-    all_github_repos={}
+    
+    
+    # g = Github(open(githubtoken_path, 'r').read())
+    # u = g.get_user()
+    # all_github_repos={}
 
-    # intitialize some variables for all projects
-    all_paths_for_this_system={}
-    all_dir=['Github','Documents','Dropbox']
+    # # intitialize some variables for all projects
+    # all_paths_for_this_system={}
+    # all_dir=['Github','Documents','Dropbox']
       
-    def __init__(self, project_name):
+    def __init__(self, project_name, githubtoken_path):
         
         self.project_name=project_name
         
