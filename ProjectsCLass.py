@@ -12,14 +12,6 @@ The basic structure is
 
 
 """
-import sys
-sys.path.insert(0, r'C:/Users/sp3660/Documents/Github/ProjectManager')
-sys.path.insert(0, r'C:/Users/sp3660/Documents/Github/LabNY/AllFunctions')
-sys.path.insert(0, r'C:/Users/sp3660/Documents/Github/LabNY/ProcessingScripts')
-sys.path.insert(0, r'C:/Users/sp3660/Documents/Github/LabNY/MainClasses')
-sys.path.insert(0, r'C:/Users/sp3660/Documents/Github/LabNY/MainClasses/Mouse Managing')
-
-from select_values_gui import select_values_gui
 import ctypes.wintypes
 import os, string
 from pathlib import Path
@@ -73,20 +65,17 @@ class Project:
             else:
                self.repo_object=self.solve_github_repo()
 
-
     @classmethod            
     def check_all_github_repos(self):
         for repo in Project.g.get_user().get_repos():
             Project.all_github_repos[repo.name]=repo
-
 
     @classmethod    
     def check_available_drives(self):   
          
         available_drives = ['%s:' % d for d in string.ascii_uppercase if os.path.exists('%s:' % d)]
         return available_drives
-           
-    
+             
     @classmethod    
     def check_documents_path(self):   
         
@@ -96,8 +85,7 @@ class Project:
         buf= ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
         ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
         return Path(buf.value)
-    
-  
+      
     @classmethod
     def check_dropbox_path(self):
         
@@ -127,25 +115,22 @@ class Project:
         personal_dbox_path = Path(j['personal']['path'])
             
         return  personal_dbox_path
-    
-               
+                   
     def create_project_folder_in_location(self,location):         
         if not os.path.exists(location):
             os.makedirs(location)
         else:            
             print('project already there')
-            
-                          
+                                      
     def read_repo_status(self): 
             try:
                 _ = git.Repo(self.project_paths['Github']).git_dir
                 print('Already a repo')
                 return True
             except git.exc.InvalidGitRepositoryError:
-                print('not repo')
+                print('Not a repo')
                 return False
-        
-               
+                       
     def solve_github_repo(self):       
          # no folder
         if not os.path.exists(self.project_paths['Github']):             
@@ -166,13 +151,7 @@ class Project:
             
         return repo_object
   
-    def select_raw_primary_and_secondary_data(self):
 
-        self.project_raw_data_path=select_values_gui(list(Project.all_paths_for_this_system.keys()),'RawData')
-        self.project_secondary_data_path=select_values_gui(list(Project.all_paths_for_this_system.keys()),'SecondaryData')
-        self.project_primary_data_path='Documents'
-
-        
         
         
         
