@@ -18,7 +18,7 @@ import sys
 
 class ProjectManager(Project):    
     def __init__(self, githubtoken_path, computer, platform):
-        
+        self.githubtoken_path=githubtoken_path
         Project.g = Github(open(githubtoken_path, 'r').read())
         Project.u = Project.g.get_user()
         Project.all_github_repos={}
@@ -38,9 +38,9 @@ class ProjectManager(Project):
     def initialize_a_project(self, project, gui) :
         import ny_lab
         if project=='LabNY':
-            sys.path.insert(0, r'C:/Users/Samuel/Documents/Github/LabNY')
-            sys.path.insert(0, r'C:/Users/Samuel/Documents/Github/LabNY/ny_lab')
-            self.lab=ny_lab.RunNYLab(gui)
+            sys.path.insert(0, r'C:/Users/sp3660/Documents/Github/LabNY')
+            sys.path.insert(0, r'C:/Users/sp3660/Documents/Github/LabNY/ny_lab')
+            self.lab=ny_lab.RunNYLab( self.githubtoken_path, gui)
             return self.lab
             
 

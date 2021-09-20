@@ -62,7 +62,7 @@ elif platform == "linux" or platform == "linux2":
 
 ProjectManager=ProjectManager(githubtoken_path, computer, platform)
 gui=1
-# lab=ProjectManager.initialize_a_project('LabNY', gui)   
+lab=ProjectManager.initialize_a_project('LabNY', gui)   
 
 
 
