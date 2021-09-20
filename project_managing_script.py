@@ -7,12 +7,12 @@ requirements
 check environemnet and anconda
 check gtihub token
 git
-caiman
 numpy
 matplotlib
-gitpython
- pip install GitPython
- pip install PyGithub
+    pip install GitPython
+    pip install PyGithub
+    conda install caiman -c conda-forge
+    conda install -c conda-forge opencv
 """
 
 from sys import platform
