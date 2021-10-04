@@ -12,6 +12,7 @@ The basic structure is
 
 
 """
+import psutil
 import ctypes.wintypes
 import os, string
 from pathlib import Path
@@ -33,9 +34,11 @@ class Project():
     # all_paths_for_this_system={}
     # all_dir=['Github','Documents','Dropbox']
       
-    def __init__(self, project_name, githubtoken_path):
+    def __init__(self, project_name, githubtoken_path, computer, platform):
         
         self.project_name=project_name
+        Project.platform=platform
+        Project.computer=computer
         
         # Set all system paths for projects and get github repos
         Project.check_all_github_repos() 
@@ -45,7 +48,12 @@ class Project():
         Project.main_drive=Project.documents_path.parts[0]       
         for drive in Project.drives:
             if drive not in Project.main_drive and 'D' not in drive:
-                Project.all_paths_for_this_system[drive]=os.path.join(drive,'\Projects')
+                if Project.platform=='win32':
+                    Project.all_paths_for_this_system[drive]=os.path.join(drive,'\Projects')
+                elif Project.platform=='linux':
+                    Project.all_paths_for_this_system[drive]=os.path.join(drive,'Projects')
+
+
                 
         
         Project.dropbox_path=Project.check_dropbox_path()
@@ -53,7 +61,10 @@ class Project():
         Project.all_paths_for_this_system['Github']=os.path.join(Project.documents_path,'Github')
         Project.all_paths_for_this_system['Documents']=os.path.join(Project.documents_path,'Projects')
         Project.all_paths_for_this_system['Dropbox']=os.path.join(Project.dropbox_path,'Projects')
-        Project.long_all_paths_for_this_system={k:'\\\?\\' + v for k, v in Project.all_paths_for_this_system.items()}
+        if Project.platform=='win32':
+            Project.long_all_paths_for_this_system={k:'\\\?\\' + v for k, v in Project.all_paths_for_this_system.items()}
+        elif Project.platform=='linux':
+            Project.long_all_paths_for_this_system=Project.all_paths_for_this_system
         
         # Set specific projects paths        
         self.project_paths={}                        
@@ -73,56 +84,68 @@ class Project():
             Project.all_github_repos[repo.name]=repo
 
     @classmethod    
-    def check_available_drives(self):   
-         
-        available_drives = ['%s:' % d for d in string.ascii_uppercase if os.path.exists('%s:' % d)]
+    def check_available_drives(self):  
+        if Project.platform=='win32':
+            available_drives = ['%s:' % d for d in string.ascii_uppercase if os.path.exists('%s:' % d)]
+        elif Project.platform=='linux':
+            available_drives=['/']
+            print('doing')
         return available_drives
+      
+            
              
     @classmethod    
     def check_documents_path(self):   
-        
-        CSIDL_PERSONAL = 5       # My Documents
-        SHGFP_TYPE_CURRENT = 0   # Get current, not default value
-        
-        buf= ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
-        ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
-        return Path(buf.value)
+        if self.platform=='win32':
+            CSIDL_PERSONAL = 5       # My Documents
+            SHGFP_TYPE_CURRENT = 0   # Get current, not default value
+            
+            buf= ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
+            ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
+            doc_path=Path(buf.value)
+          
+        elif Project.platform=='linux':
+            doc_path=Path('/home/samuel/Documents')
+
+        return doc_path
+      
       
     @classmethod
     def check_dropbox_path(self):
-        
-        _system = system()
-
-        if _system in ('Windows', 'cli'):           
-            
-            try:
-                json_path = (Path(os.getenv('LOCALAPPDATA'))/'Dropbox'/'info.json').resolve()
-            except FileNotFoundError:
-                json_path = (Path(os.getenv('APPDATA'))/'Dropbox'/'info.json').resolve()
+            _system = system()
+    
+            if _system in ('Windows', 'cli'):           
                 
-        elif _system in ('Linux', 'Darwin'):
-            json_path = os.path.expanduser('~'
-                                              '/.dropbox'
-                                              '/info.json')
-        else:
-            raise RuntimeError('Unknown system={}'
-                               .format(_system))
-        if not os.path.exists(json_path):
-            raise RuntimeError("Config path={} doesn't exists"
-                               .format(json_path))  
+                try:
+                    json_path = (Path(os.getenv('LOCALAPPDATA'))/'Dropbox'/'info.json').resolve()
+                except FileNotFoundError:
+                    json_path = (Path(os.getenv('APPDATA'))/'Dropbox'/'info.json').resolve()
                     
-        with open(str(json_path)) as f:
-            j = json.load(f)
-            
-        personal_dbox_path = Path(j['personal']['path'])
-            
-        return  personal_dbox_path
+            elif _system in ('Linux', 'Darwin'):
+                json_path = os.path.expanduser('~'
+                                                  '/.dropbox'
+                                                  '/info.json')
+            else:
+                raise RuntimeError('Unknown system={}'
+                                   .format(_system))
+            if not os.path.exists(json_path):
+                raise RuntimeError("Config path={} doesn't exists"
+                                   .format(json_path))  
+                        
+            with open(str(json_path)) as f:
+                j = json.load(f)
+                
+            personal_dbox_path = Path(j['personal']['path'])
+                
+            return  personal_dbox_path
                    
-    def create_project_folder_in_location(self,location):         
-        if not os.path.exists(location):
-            os.makedirs(location)
-        else:            
-            print('project already there')
+    def create_project_folder_in_location(self,location): 
+        # if self.platform=='win32':
+        
+            if not os.path.exists(location):
+                os.makedirs(location)
+            else:            
+                print('project already there')
                                       
     def read_repo_status(self): 
             try:
@@ -151,6 +174,7 @@ class Project():
             repo_object=Repo(self.project_paths['Github'])
             print('Already a repo, check manually')
             
+ 
         return repo_object
   
 

@@ -27,7 +27,7 @@ class ProjectManager(Project):
         Project.all_paths_for_this_system={}
         Project.all_dir=['Github','Documents','Dropbox']
 
-        Project.__init__(self, 'ProjectManager', githubtoken_path)
+        Project.__init__(self, 'ProjectManager', githubtoken_path, computer, platform)
       
         self.main_directory=self.project_paths['Documents']  
         

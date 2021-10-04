@@ -14,6 +14,7 @@ matplotlib
     conda install caiman -c conda-forge
     conda install -c conda-forge opencv
 """
+from pathlib import Path
 import tkinter as tk
 from sys import platform
 import socket
@@ -21,12 +22,10 @@ from project_manager.ProjectManager import ProjectManager
 
 house_PC='DESKTOP-V1MT0U5'
 lab_PC='DESKTOP-OKLQSQS'
-# small_laptop_ubuntu='samuel-XPS-13-9560'
-# small_laptop_kali='samuel-XPS-13-9560'
+small_laptop_ubuntu='samuel-XPS-13-9380'
+small_laptop_kali='samuel-XPS-13-9380'
 big_laptop_ubuntu='samuel-XPS-15-9560'
 big_laptop_arch='samuel-XPS-15-9560'
-
-
 
 if platform == "win32":
     if socket.gethostname()==house_PC:
@@ -37,7 +36,11 @@ if platform == "win32":
         computer=lab_PC
         
 elif platform == "linux" or platform == "linux2":
-    print('TO DO')
+    if socket.gethostname()==small_laptop_ubuntu:
+        computer=small_laptop_ubuntu
+        githubtoken_path='/home/samuel/Documents/Github/GitHubToken.txt'
+        # Path('/home/samuel/Documents/Github/GitHubToken.txt')
+        print('TO DO')
 
 
 
@@ -65,7 +68,9 @@ elif platform == "linux" or platform == "linux2":
 
 
 ProjectManager=ProjectManager(githubtoken_path, computer, platform)
-gui=1
+
+#%%
+gui=0
 update=0
 lab=ProjectManager.initialize_a_project('LabNY', gui)   
 
