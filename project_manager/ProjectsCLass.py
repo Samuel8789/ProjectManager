@@ -23,16 +23,6 @@ from git import Repo
 from github import Github
 
 class Project():
-    # get github info
-    
-    
-    # g = Github(open(githubtoken_path, 'r').read())
-    # u = g.get_user()
-    # all_github_repos={}
-
-    # # intitialize some variables for all projects
-    # all_paths_for_this_system={}
-    # all_dir=['Github','Documents','Dropbox']
       
     def __init__(self, project_name, githubtoken_path, computer, platform):
         
@@ -53,9 +43,6 @@ class Project():
                 elif Project.platform=='linux':
                     Project.all_paths_for_this_system[drive]=os.path.join(drive,'Projects')
 
-
-                
-        
         Project.dropbox_path=Project.check_dropbox_path()
            
         Project.all_paths_for_this_system['Github']=os.path.join(Project.documents_path,'Github')
@@ -156,25 +143,34 @@ class Project():
                 print('Not a repo')
                 return False
                        
-    def solve_github_repo(self):       
+    def solve_github_repo(self, project=False):       
          # no folder
-        if not os.path.exists(self.project_paths['Github']):             
-            if self.project_name in Project.all_github_repos.keys():
-                # clone repo to new folder
-                git.Git(Project.all_paths_for_this_system['Github']).clone(Project.all_github_repos[self.project_name].clone_url)
+        if not project: 
+            if not os.path.exists(self.project_paths['Github']):             
+                if self.project_name in Project.all_github_repos.keys():
+                    # clone repo to new folder
+                    git.Git(Project.all_paths_for_this_system['Github']).clone(Project.all_github_repos[self.project_name].clone_url)
+                    repo_object=Repo(self.project_paths['Github'])
+                else:  
+                    #make new repo in github                     
+                    self.github_repo= Project.u.create_repo(self.project_name)
+                    self.check_all_github_repos()
+                    git.Git(Project.all_paths_for_this_system['Github']).clone(Project.all_github_repos[self.project_name].clone_url)
+                    repo_object=Repo(self.project_paths['Github'])
+            # folder no repo    
+            elif self.read_repo_status():
                 repo_object=Repo(self.project_paths['Github'])
-            else:  
-                #make new repo in github                     
-                self.github_repo= Project.u.create_repo(self.project_name)
-                self.check_all_github_repos()
-                git.Git(Project.all_paths_for_this_system['Github']).clone(Project.all_github_repos[self.project_name].clone_url)
-                repo_object=Repo(self.project_paths['Github'])
-        # folder no repo    
-        elif self.read_repo_status():
-            repo_object=Repo(self.project_paths['Github'])
-            print('Already a repo, check manually')
+                print('Already a repo, check manually')
+        else:
+            repo_path=os.path.join(os.path.split(self.project_paths['Github'])[0],project)
+            if not os.path.exists(repo_path):             
+                if project in Project.all_github_repos.keys():
+                    # clone repo to new folder
+                    git.Git(Project.all_paths_for_this_system['Github']).clone(Project.all_github_repos[project].clone_url)
+                    Repo.clone_from(Project.all_github_repos[project].clone_url, repo_path)
+                    
+                    repo_object=Repo(repo_path)
             
- 
         return repo_object
   
 

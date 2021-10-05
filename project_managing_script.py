@@ -10,6 +10,7 @@ git
 numpy
 matplotlib
     pip install GitPython
+    configure gitpyhton
     pip install PyGithub
     conda install caiman -c conda-forge
     conda install -c conda-forge opencv
@@ -19,6 +20,8 @@ import tkinter as tk
 from sys import platform
 import socket
 from project_manager.ProjectManager import ProjectManager
+import urllib3
+
 
 house_PC='DESKTOP-V1MT0U5'
 lab_PC='DESKTOP-OKLQSQS'
@@ -67,7 +70,18 @@ elif platform == "linux" or platform == "linux2":
 """
 
 
+host="8.8.8.8"
+port=53
+timeout=1
+try:
+    socket.setdefaulttimeout(timeout)
+    socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
+    print('internet')
+except socket.error as ex:
+    print(ex)
+
 ProjectManager=ProjectManager(githubtoken_path, computer, platform)
+ProjectManager.clone_project('LabNY')   
 
 #%%
 gui=0
