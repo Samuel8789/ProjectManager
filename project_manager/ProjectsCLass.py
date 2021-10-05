@@ -166,9 +166,7 @@ class Project():
             if not os.path.exists(repo_path):             
                 if project in Project.all_github_repos.keys():
                     # clone repo to new folder
-                    git.Git(Project.all_paths_for_this_system['Github']).clone(Project.all_github_repos[project].clone_url)
-                    Repo.clone_from(Project.all_github_repos[project].clone_url, repo_path)
-                    
+                    git.Git(Project.all_paths_for_this_system['Github']).clone(Project.all_github_repos[project].clone_url)                    
                     repo_object=Repo(repo_path)
             
         return repo_object

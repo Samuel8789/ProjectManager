@@ -46,9 +46,9 @@ class ProjectManager(Project):
     
     def initialize_a_project(self, project, gui) :
         if project=='LabNY':
-            # sys.path.insert(0,  self.all_projects_in_disk['LabNY'])
+            sys.path.insert(0,  self.all_projects_in_disk['LabNY'])
             # # sys.path.insert(0, os.path.join(self.all_projects_in_disk['LabNY'],' ny_lab'))
-            # sys.path.insert(0, self.all_projects_in_disk['ProjectManager'])
+            sys.path.insert(0, self.all_projects_in_disk['ProjectManager'])
             import ny_lab
             self.lab=ny_lab.RunNYLab( self.githubtoken_path, gui)
             return self.lab

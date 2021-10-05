@@ -14,6 +14,9 @@ matplotlib
     pip install PyGithub
     conda install caiman -c conda-forge
     conda install -c conda-forge opencv
+    conda install mpl cursors
+    pip install pandastable
+    pip install tkcalendar
 """
 from pathlib import Path
 import tkinter as tk
@@ -81,7 +84,7 @@ except socket.error as ex:
     print(ex)
 
 ProjectManager=ProjectManager(githubtoken_path, computer, platform)
-ProjectManager.clone_project('LabNY')   
+# ProjectManager.clone_project('LabNY')   
 
 #%%
 gui=0
