@@ -70,6 +70,11 @@ elif platform == "linux" or platform == "linux2":
     
     BIBIGBIGBIGBIGBIB ISSUE
     Confirm males  4357 and 4376 arent mixed in their breedinsg genotype for everythin then
+    
+    ALL MY PLASMIDS ARE IN THE DNA FRIDGE IN BOX AT THE BOTTOM WITH ORANGE TAPE
+    Aliquot the dlx virus pending
+    
+    
 """
 
 
@@ -87,7 +92,7 @@ ProjectManager=ProjectManager(githubtoken_path, computer, platform)
 # ProjectManager.clone_project('LabNY')   
 
 #%%
-gui=0
+gui=1
 update=0
 lab=ProjectManager.initialize_a_project('LabNY', gui)   
 
