@@ -5,6 +5,8 @@ Created on Fri Apr  9 09:27:59 2021
 @author: sp3660
 requirements
 check environemnet and anconda
+install anaconda
+
 check gtihub token
 git
 numpy
@@ -12,11 +14,20 @@ matplotlib
     pip install GitPython
     configure gitpyhton
     pip install PyGithub
+    conda create -n caiman
+    conda activate caiman
     conda install caiman -c conda-forge
     conda install -c conda-forge opencv
     conda install mpl cursors
     pip install pandastable
     pip install tkcalendar
+    conda config --set allow_conda_downgrades true
+    conda install -n root conda=4.6
+    conda config --set auto_update_conda false
+    conda config --remove channels conda-forge
+    
+conda config --set channel_priority flexible
+conda config --add channels conda-forge
 """
 from pathlib import Path
 import tkinter as tk
