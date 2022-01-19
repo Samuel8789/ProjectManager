@@ -52,7 +52,14 @@ class ProjectManager(Project):
             import ny_lab
             self.lab=ny_lab.RunNYLab( self.githubtoken_path, gui)
             return self.lab
-            
+        elif project=='AllenBrainObservatory':
+            sys.path.insert(0,  self.all_projects_in_disk['AllenBrainObservatory'])
+            # # sys.path.insert(0, os.path.join(self.all_projects_in_disk['LabNY'],' ny_lab'))
+            sys.path.insert(0, self.all_projects_in_disk['ProjectManager'])
+            import allen
+            self.allen_ob=allen.AllenBrainObservatory(self.githubtoken_path)
+            return self.allen_ob
+                   
 
 
 

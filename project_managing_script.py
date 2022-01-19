@@ -24,6 +24,14 @@ from sys import platform
 import socket
 from project_manager.ProjectManager import ProjectManager
 import urllib3
+import os
+import pandas as pd
+
+
+
+
+
+
 
 
 house_PC='DESKTOP-V1MT0U5'
@@ -52,12 +60,9 @@ elif platform == "linux" or platform == "linux2":
 
 """
 # current errors and excepions
-    copiyn to F instead of D
     SPHQ ignored when loading mmaps 
     SPJO/P day 26 had corrupted csv files I CREATED EMPTY VOLTAGE FILES
     added two lines to create metdata and reference folder in create dir structure for datasets
-    for motioncorrected calman igonred this list to_ignore=['SurfaceImage','0Coordinate', 'nonimaging','etl','MaxResMech','Tomato','1050', '\Red']  
-    test aquisition are indieed processed
     
     TO DO
     read metadata from database
@@ -65,14 +70,22 @@ elif platform == "linux" or platform == "linux2":
     
     right now i have to change the lab paths to insert manually in project manager
     also in lab_ny_run change path
+
     
-    
-    
-    BIBIGBIGBIGBIGBIB ISSUE
-    Confirm males  4357 and 4376 arent mixed in their breedinsg genotype for everythin then
     
     ALL MY PLASMIDS ARE IN THE DNA FRIDGE IN BOX AT THE BOTTOM WITH ORANGE TAPE
-    Aliquot the dlx virus pending
+    
+    to do 
+        check new breeding corretc cages
+        add all genoitypes to code
+    
+    
+    
+    mendeley transfer
+    smal laptop
+        conda activate remark
+        cd Documents/Github/mendeley-rMsync/
+        pyhton3 sync.py
     
     
 """
@@ -93,6 +106,7 @@ ProjectManager=ProjectManager(githubtoken_path, computer, platform)
 
 #%%
 gui=1
+
 update=0
 lab=ProjectManager.initialize_a_project('LabNY', gui)   
 
@@ -117,7 +131,65 @@ if not gui:
         
         datamanaging.read_all_immaging_session_not_in_database()
  #%%   
+    # datamanaging.all_existing_sessions_not_database_objects['20211117'].process_all_imaged_mice()
+    # datamanaging.all_existing_sessions_not_database_objects['20211118'].process_all_imaged_mice()
 
+
+
+    # for i in datamanaging.all_existing_sessions_not_database_objects.values() :
+    #   i.process_all_imaged_mice()
+    for i in datamanaging.all_existing_sessions_database_objects.values() :
+        i.process_all_imaged_mice()
+    # session_name='20211113'
+    # datamanaging.all_existing_sessions_not_database_objects[session_name].load_all_yet_to_database_mice()
+    # mouse_codes=datamanaging.all_existing_sessions_not_database_objects[session_name].session_imaged_mice_codes
+    
+    # mouse_code='SPKG'
+    # mouse_object=datamanaging.all_experimetal_mice_objects[mouse_code]
+    # imaging_session=mouse_object.imaging_sessions_not_yet_database_objects[session_name]
+    # os.startfile(imaging_session.mouse_session_path)
+
+    
+    # acqs=[datamanaging.all_experimetal_mice_objects[mouse_code].all_mouse_acquisitions  for mouse_code in mouse_codes]
+    # imaging_session=[datamanaging.all_experimetal_mice_objects[mouse_code]  for mouse_code in mouse_codes]
+
+    
+    
+    # fullalen=acqs[1][list(acqs[1].keys())[-2]]
+    
+    
+    # fullalen.face_camera.full_eye_camera.play()
+    # test=pd.DataFrame(fullalen.voltage_signals_dictionary['Locomotion'])
+    # test.plot()
+
+    # fullalen.metadata_object
+    
+    # fullalen.all_datasets
+    # surface=list(fullalen.FOV_object.all_datasets[-1].values())[0]
+    # surface_green=list(surface.all_datasets.values())[0]
+    # surface_red=list(surface.all_datasets.values())[0]
+    # surface_green.summary_images_object.plotting()
+    # surface_red.summary_images_object.plotting()
+    
+    
+    
+    
+    # fullalgrenplane1=fullalen.all_datasets[list(fullalen.all_datasets.keys())[0]]
+    # fullalgrenplane1.kalman_object.dataset_kalman_caiman_movie.play(fr=1000)
+    # fullalgrenplane1.summary_images_object.plotting()
+    # # %matplotlib qt
+    # fullalgrenplane1.most_updated_caiman.cnm_object.estimates.view_components()
+    # fullalgrenplane1.selected_dataset_mmap_path
+    # os.startfile(fullalgrenplane1.selected_dataset_mmap_path)
+
+    
+    # coord0=list(fullalen.FOV_object.mouse_imaging_session_object.all_0coordinate_Aquisitions.values())[0]
+    # widef=fullalen.FOV_object.mouse_imaging_session_object.widefield_image[list(fullalen.FOV_object.mouse_imaging_session_object.widefield_image.keys())[0]]
+    # widef.plot_image()
+    
+    #%%
+# datamanaging.all_existing_sessions_not_database_objects['20211111'].process_all_imaged_mice()
+#
 # mice_codes=['SPJA', 'SPJC']
 # datamanaging.copy_all_mouse_with_data_to_working_path(mice_codes)
 
