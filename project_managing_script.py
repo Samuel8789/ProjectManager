@@ -127,6 +127,7 @@ data_analysis_database=0
 data_analysis_not_yet_database=0
 data_processing=0
 gui=0
+testing=0
 
 #%%
 if testing:
@@ -446,25 +447,6 @@ elif data_processing:
     prairie_session.process_all_imaged_mice()
     
 
-   
-    
-    #%% get dataset and add raw path to redo inital preprocesing
-    # acq.all_datasets
-    # dataset=list(acq.all_datasets.items())[0]
-    # dat= dataset[1]
-    # dat.metadata.acquisition_metadata['AcquisitonRawPath']
-    # channel=os.path.split(dat.selected_dataset_mmap_path)[1]
-    # if 'Green' in channel:
-    #     rawchan='Ch2Green'
-    # else:
-    #     rawchan='Ch1Red'
-    # dataset_name=os.path.split(os.path.split(os.path.split(os.path.split(dat.selected_dataset_mmap_path)[0])[0])[0])[1]
-    # dat.selected_dataset_raw_path=os.path.join(dat.metadata.acquisition_metadata['AcquisitonRawPath'],dataset_name, rawchan, dat.plane.lower())
-    # dat.do_bidishift(force=True)
-    
-
-
-
     #%%  
     # #%% git managing TO WORK ON IT
     
@@ -482,10 +464,25 @@ elif data_processing:
     # count_modified_files = len(labRepo.index.diff(None))
     # count_staged_files = len(labRepo.index.diff("HEAD"))
     # commits = list(labRepo.iter_commits('master'))
-    
+#%%
 elif testing:
+    #%%
+    mousename='SPKG'
+    mouse_object=datamanaging.all_experimetal_mice_objects[mousename]
+    allacqs=mouse_object.all_mouse_acquisitions
+
+    pprint(list(allacqs.keys()))
+    # selectedaqposition = int(input('Choose Aq position.\n'))
+    selectedaqposition=1
+    
+    #% getting acq
+    acq=allacqs[list(allacqs.keys())[selectedaqposition]]
     
     
+    # % basic analysis routine
+    acq.load_results_analysis() 
     
+    #%%
+    acq.analysis_object.signal_alignment_testing()
     
     pass
