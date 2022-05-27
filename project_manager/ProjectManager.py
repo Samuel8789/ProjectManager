@@ -6,12 +6,14 @@ Created on Fri Apr  9 09:28:30 2021
 """
 
 
+import importlib.util
+import sys
 
 from github import Github
 from .ProjectsCLass import Project
+
 import os
 import glob
-import sys
 
 
 

@@ -5,7 +5,7 @@
 ### MATLAB ###
 # Windows default autosave extension
 *.asv
-*.mat*
+*.mat
 
 # OSX / *nix default autosave extension
 *.m~
