@@ -72,6 +72,7 @@ class TODO_Selection(tk.Tk):
         'do_data_analysis_from_non_database',
         'do_data_analysis_from_database',
         'explore_analysis',
+        'do_visualstim_indexing',
         'do_jesus_ensemble',
         'do_tuning_allen',
         'do_yuriy_ensembles']
@@ -208,8 +209,7 @@ class TODO_Selection(tk.Tk):
                 allimagedmice=datamanaging.all_imaged_mice['Code'].unique().tolist()
                 
                 # tododeepcaiman=['SPHV', 'SPHW','SPHX','SPJB','SPJD','SPKF','SPKH','SPKI','SPKL','SPIG','SPIH']
-                tododeepcaiman=['SPGT', 'SPHQ','SPIB','SPIC','SPIL','SPIM','SPIN','SPJF','SPJG','SPJH','SPJI','SPJZ','SPKC','SPKQ','SPKS',	'SPKU'	,'SPKV'	,'SPLE',	'SPLF']
-
+                tododeepcaiman=['SPGT', 'SPHQ','SPIB','SPIC','SPIL','SPIM','SPIN','SPJF','SPJG','SPJH','SPJI','SPJZ','SPKC','SPKS',	'SPKU'	,'SPKV'	,'SPLE',	'SPLF']
                 for i in tododeepcaiman:
                     datamanaging.do_deep_caiman_of_mice_datasets([i])
 #%% dataset focus
@@ -468,8 +468,15 @@ class TODO_Selection(tk.Tk):
             elif 'do_data_analysis_from_database' in self.selected_things_to_do:
                 
                 # select mouse
-                mousenames=['SPKG','SPHV']
-                mousename=mousenames[0]
+                mousenamesinter=['SPKG','SPHV']
+                mousenameschand=['SPKQ','SPKS','SPJZ','SPJF','SPJG']
+                
+                #spKQ chandeliers plane1 18, 27, 121, 228
+                #spKQ chandeliers plane2 52(fist pass caiman)
+
+                # mousename=mousenameschand[0]
+                mousename=mousenamesinter[0]
+
                 mouse_object=datamanaging.all_experimetal_mice_objects[mousename]
                 
                 # select aquisition
@@ -481,8 +488,10 @@ class TODO_Selection(tk.Tk):
                 
                 # get datasets
                 acq.get_all_database_info()
-                acq.load_results_analysis(new_full_data=False) 
-                # acq.load_results_analysis(new_full_data=True) 
+                #%%
+                # acq.load_results_analysis(new_full_data=False) 
+                acq.load_results_analysis(new_full_data=True) 
+                #%%
                 analysis=acq.analysis_object
                 full_data=analysis.full_data
 
@@ -532,15 +541,19 @@ class TODO_Selection(tk.Tk):
                     # sio.savemat(r'C:\Users\sp3660\Desktop\Paradigm.mat',OutData)
                     # sio.savemat(r'C:\Users\sp3660\Desktop\Paradigm.mat',output)
                                     
-
+#%%
                     plane='Plane1'
-                    cell=6
-                    trace_type='mcmc_smoothed'
+                    cell=1
+                    trace_type='mcmc_binary'
+                    # trace_type='mcmc_smoothed'
+
                     correctedcell=analysis.do_some_plotting(cell, trace_type, plane)
-                    # analysis.plot_orientation(correctedcell,trace_type,plane)
+                    analysis.plot_orientation(correctedcell,trace_type,plane)
                     # analysis.plot_blank_sweeps(cell,trace_type,plane)
                     # analysis.plot_directions(cell,trace_type,plane)
-                    
+                    for cell in range(14,15):
+                        correctedcell=analysis.do_some_plotting(cell, trace_type, plane)
+                        analysis.plot_orientation(correctedcell,trace_type,plane)
                     
                     # ori=45
                     # stimsequence=np.arange()
@@ -553,6 +566,18 @@ class TODO_Selection(tk.Tk):
                     #     ax.vlines(test[k-1], ymin=k+0, ymax=k+1, color=color[k])
         
 #%% jesusanalysis new
+
+                elif 'do_visualstim_indexing'  in self.selected_things_to_do:
+                    
+                    self.destroy()
+                    return
+                    #%%
+                    analysis.signals_object.process_all_signals()
+                    analysis.create_full_data_container()
+                    analysis.create_stim_table()
+                    #%%
+
+
                 elif 'do_jesus_ensemble'  in self.selected_things_to_do:
                     
                     self.destroy()
@@ -653,11 +678,11 @@ class TODO_Selection(tk.Tk):
                     # analysis.load_jesus_results(all_grat[0])
                     analysis.load_jesus_results(pyr_grat[0])
                     analysis.load_jesus_results(int_grat[0])
-                    analysis.load_jesus_results(all_results[1])
+                    analysis.load_jesus_results(all_results[0])
 
 
                     analysis.jesus_runs
-                    jesusres_object=analysis.jesus_runs[list(analysis.jesus_runs.keys())[0]]    
+                    jesusres_object=analysis.jesus_runs[list(analysis.jesus_runs.keys())[2]]    
                     jesusres_object.load_analysis_from_file()
                     jesusres_object.plotting_summary()
                     jesusres_object.plot_raster()
@@ -698,8 +723,6 @@ class TODO_Selection(tk.Tk):
                             
                         cell_subtype_runs[run]=[run_object,ensemble_cell_identity, vectors]
                         
-                    
-                    
                     an=cell_subtype_runs[list(cell_subtype_runs.keys())[0]][0].analysis
                     cell_subtype_runs[list(cell_subtype_runs.keys())[0]][0].analysis['Ensembles']['EnsembleNeurons']
                     combinedraster=cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_All_' in i][0]][2].astype('float')
@@ -752,8 +775,10 @@ class TODO_Selection(tk.Tk):
                     
                     combined=cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_All_' in i][0]]
                     pyramidals= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Pyr_' in i][0]]
+                   
+
                     interneurons= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Int_' in i][0]]
-                    
+
                     
                     similarities={}
                     for name,ensemble in combined[1].items():
@@ -848,9 +873,59 @@ class TODO_Selection(tk.Tk):
 
 
 
-
+                    indexes=((analysis.full_data['visstim_info']['Paradigm_Indexes']['first_drifting_set_first'],
+                    analysis.full_data['visstim_info']['Paradigm_Indexes']['first_drifting_set_last']),
+                    (analysis.full_data['visstim_info']['Paradigm_Indexes']['second_drifting_set_first'],
+                    analysis.full_data['visstim_info']['Paradigm_Indexes']['second_drifting_set_last']),
+                    (analysis.full_data['visstim_info']['Paradigm_Indexes']['third_drifting_set_first'],
+                    analysis.full_data['visstim_info']['Paradigm_Indexes']['third_drifting_set_last'])) 
+                    
+                    indexes=((analysis.full_data['visstim_info']['Paradigm_Indexes']['first_movie_set_first'],analysis.full_data['visstim_info']['Paradigm_Indexes']['first_movie_set_last']),
+                    (analysis.full_data['visstim_info']['Paradigm_Indexes']['short_movie_set_first'],analysis.full_data['visstim_info']['Paradigm_Indexes']['short_movie_set_last']),
+                    (analysis.full_data['visstim_info']['Paradigm_Indexes']['second_movie_set_first'],analysis.full_data['visstim_info']['Paradigm_Indexes']['second_movie_set_last']))
+                    
+                    
+                    
                     trace_type='mcmc_binary'
+                    trace_type='mcmc_smoothed'
 
+                    plane='Plane1'
+                    ensmeble='Ensemble: '
+                    
+                    celtyp='Pyramidals'
+                    ense=pyramidals[1][ensmeble][celtyp]
+                    
+                    celtyp='Interneurons'
+                    ense=interneurons[1][ensmeble][celtyp]
+                    
+                    cells=np.array(ense)
+                    cells=np.concatenate([np.array(ensemble_cell_identity[ensmeble]['Pyramidals']).astype('int'), np.array(ensemble_cell_identity[ensmeble]['Interneurons']).astype('int')])
+                    celtyp='All'
+
+                   
+
+                    test=analysis.full_data['imaging_data'][plane]['Traces'][trace_type]
+                    paradigm_sliced_raster= analysis.slice_matrix_by_paradigm_indexes(test, indexes)
+                    paradigm_sliced_speed= analysis.slice_matrix_by_paradigm_indexes(np.expand_dims(analysis.full_data['voltage_traces']['Speed'],axis=0), indexes).squeeze()
+
+                   
+                    pixel_per_bar = 4
+                    dpi = 100
+                    # fig = plt.figure(figsize=(6+(200*pixel_per_bar/dpi), 10), dpi=dpi)
+                    fig , ax= plt.subplots(2,figsize=(16,9), dpi=dpi)
+                    ax[0].imshow(paradigm_sliced_raster[cells,:], cmap='binary', aspect='auto',
+                        interpolation='nearest', norm=mpl.colors.Normalize(0, 0.1))
+                    ax[0].set_xlabel('Time (s)')
+                    ax[1].plot(paradigm_sliced_speed)
+                    ax[1].margins(x=0)
+                    fig.supylabel('Cell')
+                    fig.suptitle(f'{celtyp}_{ensmeble}')
+                    
+
+                    
+                    
+                    
+                    
                     ensemble=list(similarities.keys())[0]   
                     cells=copy.copy(combined[1][ensemble]['Pyramidals'])
                     cells.extend(combined[1][ensemble]['Interneurons'])
@@ -863,6 +938,61 @@ class TODO_Selection(tk.Tk):
                     all_mena_act=[]
                     for ensemble in similarities['Ensemble: 1']['Pyramidals'].keys():
                         cells=copy.copy(pyramidals[1][ensemble]['Pyramidals'])
+                        meanacti=[]
+                        for cell in cells:
+                            correctedcell=analysis.do_some_plotting(cell, trace_type, plane)
+                            s2,_=analysis.plot_orientation(correctedcell,trace_type,plane)
+                            meanacti.append((s2))
+    
+    
+                        meanoriactensemble=np.zeros((4,1))
+                        test=list(zip(*meanacti))
+                        meani=[]
+                        for j,i in enumerate(test):
+                            meanoriactensemble[j]=(np.mean(i))
+                        all_mena_act.append(meanoriactensemble)
+                        
+                    fig,ax=plt.subplots(1)
+                    for i,ensembl in enumerate(all_mena_act):
+                        ax.plot([0,45,90,135],ensembl, label='Ensemble: {}'.format(i+1))
+                        ax.set_xticks([0,45,90,135])        # set xtick values
+
+                    ax.legend(loc=2)
+                    
+                    
+                    all_mena_act=[]
+                    for ensemble in similarities['Ensemble: 1']['Interneurons'].keys():
+                        cells=copy.copy(interneurons[1][ensemble]['Interneurons'])
+                        meanacti=[]
+                        for cell in cells:
+                            correctedcell=analysis.do_some_plotting(cell, trace_type, plane)
+                            s2,_=analysis.plot_orientation(correctedcell,trace_type,plane)
+                            meanacti.append((s2))
+    
+    
+                        meanoriactensemble=np.zeros((4,1))
+                        test=list(zip(*meanacti))
+                        meani=[]
+                        for j,i in enumerate(test):
+                            meanoriactensemble[j]=(np.mean(i))
+                        all_mena_act.append(meanoriactensemble)
+                        
+                    fig,ax=plt.subplots(1)
+                    for i,ensembl in enumerate(all_mena_act):
+                        ax.plot([0,45,90,135],ensembl, label='Ensemble: {}'.format(i+1))
+                        ax.set_xticks([0,45,90,135])        # set xtick values
+
+                    ax.legend(loc=2)
+                    
+                    
+                    
+                    
+                    all_mena_act=[]
+                    for ensemble in ensemble_cell_identity.keys():
+                        
+                        cells=np.append(np.array(ensemble_cell_identity[ensemble]['Pyramidals']),
+                                        np.array(ensemble_cell_identity[ensemble]['Interneurons']))
+                        
                         meanacti=[]
                         for cell in cells:
                             correctedcell=analysis.do_some_plotting(cell, trace_type, plane)
