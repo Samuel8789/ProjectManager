@@ -24,6 +24,8 @@ import glob
 import matplotlib as mpl
 from pprint import pprint
 import scipy as spy
+import scipy.io as sio
+
 from scipy.spatial.distance import squareform, pdist
 from scipy.stats import kendalltau, pearsonr, spearmanr, ttest_ind, zscore
 import copy
@@ -123,9 +125,7 @@ class TODO_Selection(tk.Tk):
             self.destroy()
             return
             allen.set_up_monitor( screen_size=[750,1280], lenght=37.7)
-            #%%
             allen.get_visual_templates()
-            #%%
             # allen.get_gratings()
             # allen.get_drifting_gratings()
         
@@ -164,7 +164,6 @@ class TODO_Selection(tk.Tk):
             
             from ny_lab.data_analysis.resultsAnalysis import ResultsAnalysis
             allen_results_analysis=ResultsAnalysis(allen_BO_tuple=(allen,data_set,spikes ))
-            #%%
             allen_results_analysis.do_PCA( allen_results_analysis.drifting[0].mean_sweep_response, allen_results_analysis.drifting[0].sweep_response, allen_results_analysis.drifting[-1])
             
             
@@ -488,13 +487,11 @@ class TODO_Selection(tk.Tk):
                 
                 # get datasets
                 acq.get_all_database_info()
-                #%%
-                # acq.load_results_analysis(new_full_data=False) 
-                acq.load_results_analysis(new_full_data=True) 
-                #%%
+                acq.load_results_analysis(new_full_data=False) 
+                # acq.load_results_analysis(new_full_data=True) 
                 analysis=acq.analysis_object
                 full_data=analysis.full_data
-
+            
                 
                 self.to_return[5:]=[ mousename,  mouse_object , allacqs, selectedaqposition, acq, analysis,full_data]
 #%% analysis exploration 
@@ -504,14 +501,92 @@ class TODO_Selection(tk.Tk):
                       
                     self.destroy()
                     return
+                    # %%VIARIABLE SELECTONS
+                    trace_types=['demixed', 'denoised', 
+                     'dfdt_raw',  'dfdt_smoothed', 'dfdt_binary',
+                     'foopsi_raw', 'foopsi_smoothed','foopsi_binary',
+                     'mcmc_raw','mcmc_smoothed','mcmc_binary']
+                    trace_type=trace_types[4]
+                    final_binary_trace_types=['dfdt_binary','mcmc_binary']
+    
+                    
+                    paradigms=['Movie1','Spontaneous','Drifting_Gratings','Movie3']
+                    paradigm=paradigms[2]
+    
+                    planes=['All_planes_rough', 'Plane1', 'Plane2', 'Plane3']
+                    plane=planes[0]
+                    
+                    full_raster_pyhton_cell_idx=252
+    
+                    matlab_sorter_plane='Plane3'
+                    matlab_sorter_idx=136
+                    
+                    full_raster_pyhton_cell_idx_list=[2,12,54,123,201,305]
+    
+                    selected_cells_options=['All','Pyramidal','Interneurons',full_raster_pyhton_cell_idx_list]
+                    selected_cells=selected_cells_options[0]
+                    
+                    directions=np.linspace(0,360-45,8).astype('uint16')
+                    orientations=np.linspace(0,180-(180/4),4).astype('uint16')
+                    temp_frequencies=np.array([1,2,4,8,15]).astype('uint16')
+                    direction_list=[0,45,90,135,180,270,315]
+                    temporal_frequency_list=np.array(temp_frequencies[:])
                 
+                    dur_frames=[33,50]
+                    isi_frames=[16,25]
+                    selected_dur_frames=dur_frames[0]
+                    selected_isi_frames=isi_frames[0]
+                    
+                    drifting_options=[direction_list,temporal_frequency_list, selected_dur_frames,selected_isi_frames]
+    
+    
+                    #revariabling
+                    full_imaging_data=full_data['imaging_data']
+                    vistsiminfo=full_data['visstim_info']
+                    meta=analysis.metadata_object
+                    pyr_int_ids_and_indexes=analysis.pyr_int_ids_and_indexes
+                    pyr_int_identification=analysis.pyr_int_identification
+                    selected_plane_pyhton_sorter_cell_ids=full_imaging_data[plane]['CellIds']
+                    #%% SLICING AND INDEXING CELLS STIMULI PLANES AND TRACES EXAMPLES
+                   
+                    
+                    #get info of a cell indexed from a python raster
+                    if full_raster_pyhton_cell_idx:
+                        selected_plane, total_cells,\
+                            full_raster_cell_python_idx, single_plane_selected_pyhton_cell_idx,single_plane_sorter_pyhton_idx,matlab_sorter_cell_id\
+                                =analysis.convert_full_planes_idx_to_single_plane_final_indx(full_raster_pyhton_cell_idx,plane)
+                                
+                                
+                     #get info of a cell indexed from a the matlab sorter
+                    # if matlab_sorter_idx:
+                    #     selected_plane, total_cells,\
+                    #     full_raster_cell_python_idx, single_plane_selected_pyhton_cell_idx, single_plane_sorter_pyhton_idx, matlab_sorter_cell_id\
+                    #         =analysis.convert_full_planes_idx_to_single_plane_final_indx\
+                    #             (analysis.get_full_raster_indx_from_matlab_sorter_idx(matlab_sorter_idx, matlab_sorter_plane),'All_planes_rough')
+                    #             #%
+                                
+                    if full_raster_pyhton_cell_idx_list:
+                        all_index_info=[ analysis.convert_full_planes_idx_to_single_plane_final_indx(full_raster_pyhton_cell_idx,plane)  for full_raster_pyhton_cell_idx in full_raster_pyhton_cell_idx_list]
+                        
+                    # get tomato identity    
+                    cell_identity=analysis.indetify_full_rater_idx_cell_identity(full_raster_cell_python_idx, plane)
+                    if all_index_info:
+                        all_index_info=[(cell, analysis.indetify_full_rater_idx_cell_identity(cell[2], plane))for cell in all_index_info]
+                        
+                        
+                    activity_arrays= analysis.get_raster_with_selections(trace_type,plane,selected_cells, paradigm, drifting_options)
+                        
+    
+                #%% explore analysis object
+
+                    
                     # check caiman rasters
                     for dataset in analysis.calcium_datasets.values():
                         dataset.most_updated_caiman.CaimanResults_object.plot_final_rasters()
                 
                 
     
-                    #%% explore analysis object
+                    analysis.plot_all_planes_by_cell_type()
                     analysis.full_data_list
                     analysis.reload_other_full_data(-1)
                     imagingdata=full_data['imaging_data']
@@ -541,11 +616,10 @@ class TODO_Selection(tk.Tk):
                     # sio.savemat(r'C:\Users\sp3660\Desktop\Paradigm.mat',OutData)
                     # sio.savemat(r'C:\Users\sp3660\Desktop\Paradigm.mat',output)
                                     
-#%%
                     plane='Plane1'
                     cell=1
-                    trace_type='mcmc_binary'
-                    # trace_type='mcmc_smoothed'
+                    # trace_type='mcmc_binary'
+                    trace_type='mcmc_smoothed'
 
                     correctedcell=analysis.do_some_plotting(cell, trace_type, plane)
                     analysis.plot_orientation(correctedcell,trace_type,plane)
@@ -565,141 +639,167 @@ class TODO_Selection(tk.Tk):
                     # for k in range(1,9):
                     #     ax.vlines(test[k-1], ymin=k+0, ymax=k+1, color=color[k])
         
-#%% jesusanalysis new
+                #%% TO DO manual GETING THE VISSTIM INDEXES
 
                 elif 'do_visualstim_indexing'  in self.selected_things_to_do:
                     
                     self.destroy()
                     return
-                    #%%
                     analysis.signals_object.process_all_signals()
                     analysis.create_full_data_container()
                     analysis.create_stim_table()
-                    #%%
+                #%% crf preparation
+                elif 'crf_prep' in self.selected_things_to_do:
+                    self.destroy()
+                    return
+                    analysis.signals_object.create_full_recording_grating_binary_matrix()
+                    
+                    grating_Binary_Maytrix_downsampled=np.vstack([analysis.resample(analysis.signals_object.full_stimuli_binary_matrix[srtim], 
+                                                                           factor=analysis.milisecond_period, kind='linear').squeeze() for srtim in range (analysis.signals_object.full_stimuli_binary_matrix.shape[0])]),
+                    udf=grating_Binary_Maytrix_downsampled[0]
+                    
+                    twoherzonly=udf[8:16,:]
+                    twoherzonly.sum(1)
+                    twoherzonly[3,(twoherzonly[3]>0) & (twoherzonly[3]<1)]=0
+                    
 
+                    
+                    #getcorrdinates and centers
+                    all_planes_center_of_mass=np.empty((0,3))
+                    for k,v in analysis.caiman_results.items():
+                        plane_id=int(k[k.find('_Plane')+6])
+                        planecolumn=np.full((v.accepted_center_of_mass.shape[0],1), plane_id)
+                        fullplane_array=np.hstack(( v.accepted_center_of_mass , planecolumn))
+                        all_planes_center_of_mass=np.vstack((all_planes_center_of_mass,fullplane_array))
+                        
+     
+                    activity_arrays= analysis.get_raster_with_selections(trace_type,plane,selected_cells, paradigm, drifting_options)
+                    
+                    sio.savemat(os.path.join(analysis.data_paths['CRFs_runs_path'],'data.mat'),{'data':activity_arrays[1].T})
+                    sio.savemat(os.path.join(analysis.data_paths['CRFs_runs_path'],'UDF.mat'), {'UDF':twoherzonly.T})
+                    sio.savemat(os.path.join(analysis.data_paths['CRFs_runs_path'],'ROIs.mat'),{'ROIs':all_planes_center_of_mass})
+
+
+
+
+                 #%% jesusanalysis new
 
                 elif 'do_jesus_ensemble'  in self.selected_things_to_do:
                     
                     self.destroy()
                     return
-                    plane='Plane1'
-                    cell=6
-                    trace_type='mcmc_binary'
-                    full_imaging_data=full_data['imaging_data']
-                    plane1_ids=full_imaging_data['Plane1']['CellIds']
-                    plane1_timestamps=full_imaging_data['Plane1']['Timestamps'][0]
-                    plane1_mcmctraces_raw=full_imaging_data['Plane1']['Traces']['mcmc_raw']
-                    plane1_mcmctraces_smoothed=full_imaging_data['Plane1']['Traces']['mcmc_smoothed']
-                    plane1_mcmctraces_binarized=full_imaging_data['Plane1']['Traces']['mcmc_binary']
-                    new_binarized_MCMC=np.where(plane1_mcmctraces_smoothed > 0.01, 1, 0)
-                    vistsiminfo=analysis.full_data['visstim_info']
-                    
-                    
-                    plane1_dfdttraces_smoothed=full_imaging_data['Plane1']['Traces']['dfdt_smoothed']
-                    plane1_dfdttraces_binarized=full_imaging_data['Plane1']['Traces']['dfdt_binary']
+                
 
+                    #%% RUN NEW JESUS ANALYSIS ALL POSIBLE SLICES COMBINATIONS
+                    print( final_binary_trace_types)
+                    print(planes)
+                    print(paradigms)
+                    print(selected_cells_options)
                     
-                    rastertoplot=plane1_mcmctraces_binarized
-                    tracetoplot1=plane1_mcmctraces_binarized
-                    tracetoplot2=plane1_dfdttraces_binarized
-                    # tracetoplot3=full_data['voltage_traces']['Speed']
-                    tracetoplot3=new_binarized_MCMC
-
-
-                    
-                    rastercells=np.arange(0,rastertoplot.shape[0])
-                    rastercell=3
-                    matlabid=plane1_ids[rastercell]+1
-                    correction=0
-                    fig,ax=plt.subplots(4, sharex=True)
-                    ax[0].imshow(rastertoplot[rastercells,vistsiminfo['Spontaneous']['stimulus_table']['start'][0]-correction:vistsiminfo['Spontaneous']['stimulus_table']['end'][0]-correction], aspect='auto', vmax=0.1)
-                    ax[1].plot(tracetoplot1[rastercell,vistsiminfo['Spontaneous']['stimulus_table']['start'][0]-correction:vistsiminfo['Spontaneous']['stimulus_table']['end'][0]-correction])
-                    ax[1].margins(x=0)
-                    ax[2].plot(tracetoplot2[rastercell,vistsiminfo['Spontaneous']['stimulus_table']['start'][0]-correction:vistsiminfo['Spontaneous']['stimulus_table']['end'][0]-correction])
-                    ax[2].margins(x=0)
-                    ax[3].plot(tracetoplot3[rastercell,vistsiminfo['Spontaneous']['stimulus_table']['start'][0]-correction:vistsiminfo['Spontaneous']['stimulus_table']['end'][0]-correction])
-                    ax[3].margins(x=0)
-                   
-
-                    vistsiminfo=analysis.full_data['visstim_info']
-                    meta=analysis.metadata_object
-
- 
-                    analysis.load_jesus_analysis(binary_raster_to_proces='MCMC', plane='Plane1', segment='DriftingGratings',cell_type='Pyr' )
-                    analysis.load_jesus_analysis(binary_raster_to_proces='MCMC', plane='Plane1', segment='DriftingGratings',cell_type='Int' )
-                    analysis.load_jesus_analysis(binary_raster_to_proces='MCMC', plane='Plane1', segment='DriftingGratings',cell_type='All' )
-                    analysis.load_jesus_analysis(binary_raster_to_proces='MCMC', plane='All', segment='DriftingGratings',cell_type='All' )
-
-                    # analysis.load_jesus_analysis(binary_raster_to_proces='dfdt', plane='Plane1', segment='DriftingGratings',cell_type='Pyr' )
-                    # analysis.load_jesus_analysis(binary_raster_to_proces='dfdt', plane='Plane1', segment='DriftingGratings',cell_type='Int' )
-                    # analysis.load_jesus_analysis(binary_raster_to_proces='dfdt', plane='Plane1', segment='DriftingGratings',cell_type='All' )
-                    
-                    # analysis.load_jesus_analysis(binary_raster_to_proces='dfdt', plane='Plane1', segment='Full',cell_type='Pyr' )
-                    # analysis.load_jesus_analysis(binary_raster_to_proces='dfdt', plane='Plane1', segment='Full',cell_type='Int' )
-                    # analysis.load_jesus_analysis(binary_raster_to_proces='MCMC', plane='Plane1', segment='Full',cell_type='All' )
-                    
-                    # analysis.load_jesus_analysis(binary_raster_to_proces='MCMC', plane='Plane1', segment='Spontaneous',cell_type='Pyr' )
-                    # analysis.load_jesus_analysis(binary_raster_to_proces='MCMC', plane='Plane1', segment='Spontaneous',cell_type='Int' )
-                    # analysis.load_jesus_analysis(binary_raster_to_proces='MCMC', plane='Plane1', segment='Spontaneous',cell_type='All' )
-
-
-                    analysis.check_all_jesus_results()
-
-                    pprint(analysis.jesus_results_list)
-                    
-                    
-                    # select jesus results to explore
-                    
-                    deconv='MCMC'
-                    deconv='dfdt'
-                    all_divisions=0
-                    index=0
-                    cell_type='Pyr'
-                    cell_type='Int'
-                    
-                    pyr_results=[i for i in  analysis.jesus_results_list if 'Pyr' in i]
-                    int_results=[i for i in  analysis.jesus_results_list if '_Int_' in i]
-                    full_results=[i for i in  analysis.jesus_results_list if '_Full' in i]
-                    drift_grat_results=[i for i in  analysis.jesus_results_list if 'DriftingGratings' in i]
-                    mcmc_results=[i for i in  analysis.jesus_results_list if 'mcmc' in i]
-                    dfdtresults=[i for i in  analysis.jesus_results_list if 'dfdt' in i]
-                    all_results=[i for i in  analysis.jesus_results_list if '_All' in i]
-
+                    for paradigm in paradigms[2:]:
+                        for plane in planes[0:2]:
+                            for trace_type in final_binary_trace_types[1:]:
+                                for selected_cells in selected_cells_options[:3]:
+                                    activity_arrays= analysis.get_raster_with_selections(trace_type, plane, selected_cells, paradigm=paradigm) 
+                                    analysis.run_jesus_analysis(activity_arrays)
+                                    
+                                    
+                    paradigm=paradigms[2]
+                    plane = planes[0]
+                    for trace_type in final_binary_trace_types[0:]:
+                        for selected_cells in selected_cells_options[:3]:
+                            activity_arrays= analysis.get_raster_with_selections(trace_type, plane, selected_cells, paradigm=paradigm) 
+                            analysis.run_jesus_analysis(activity_arrays)
+                        
+                    #%% CHECKING JESUS RESULTS
                     
                     def intersection(lst1, lst2):
                         return list(set(lst1) & set(lst2))
-                    
+
+                    analysis.check_all_jesus_results()
+                    pprint(analysis.jesus_results_list)
+                    pprint(final_binary_trace_types)
+                    pprint(planes)
+                    pprint(paradigms)
+                    pprint(selected_cells_options)
+            
+                    #results by cell type
+                    pyr_results=[i for i in  analysis.jesus_results_list if (('Pyr' in i) and ('.pkl' in i))]
+                    int_results=[i for i in  analysis.jesus_results_list if (('_Interneurons_' in i) and ('.pkl' in i))]
+                    all_cells_results=[i for i in  analysis.jesus_results_list if (('_All_jes' in i) and ('.pkl' in i))]
+
+                    #results by paradigm
+                    full_movie_results=[i for i in  analysis.jesus_results_list if (('_Full' in i) and ('.pkl' in i))]
+                    drift_grat_results=[i for i in  analysis.jesus_results_list if (('Drifting' in i) and ('.pkl' in i))]
+                    movie1_results=[i for i in  analysis.jesus_results_list if (('Movie1' in i) and ('.pkl' in i))]
+                    movie2_results=[i for i in  analysis.jesus_results_list if (('Movie3' in i) and ('.pkl' in i))]
+                    spont_results=[i for i in  analysis.jesus_results_list if (('Spont' in i) and ('.pkl' in i))]
+
+
+                    #results by trace type
+                    mcmc_results=[i for i in  analysis.jesus_results_list if (('mcmc' in i) and ('.pkl' in i))]
+                    dfdtresults=[i for i in  analysis.jesus_results_list if (('dfdt' in i) and ('.pkl' in i))]
+
+     
                     pyr_grat=intersection(pyr_results, drift_grat_results)
                     int_grat=intersection(int_results, drift_grat_results)
-                    all_grat=intersection(all_results, drift_grat_results)
+                    all_cells_grat=intersection(all_cells_results, drift_grat_results)
 
                     
-
-                    # analysis.load_jesus_results(all_grat[0])
-                    analysis.load_jesus_results(pyr_grat[0])
-                    analysis.load_jesus_results(int_grat[0])
-                    analysis.load_jesus_results(all_results[0])
-
-
+                    #%% LOAdING JESUS RESULTS 
+                    # results get loaded to jesus runs to compare betwen runs
+                    analysis.unload_all_runs()
+                    analysis.load_jesus_results(mcmc_results[0])
+                    # analysis.load_jesus_results(pyr_grat[0])
+                    # analysis.load_jesus_results(int_grat[0])
+                    # analysis.load_jesus_results(all_cells_grat[0])
+                    #%% ANALYSIS SINGLE RESULT RUN
+                    analysis.unload_all_runs()
+                    analysis.load_jesus_results(mcmc_results[0])
                     analysis.jesus_runs
-                    jesusres_object=analysis.jesus_runs[list(analysis.jesus_runs.keys())[2]]    
+                    jesusres_object=analysis.jesus_runs[list(analysis.jesus_runs.keys())[0]]
                     jesusres_object.load_analysis_from_file()
-                    jesusres_object.plotting_summary()
+                    jesusanalysis=jesusres_object.analysis
+                    jesusoptions=jesusres_object.input_options
+  
+                    # %UMMARY PLOTTING
+                    #%
                     jesusres_object.plot_raster()
+                    jesusres_object.plot_sorted_rasters()
                     jesusres_object.plot_networks()
+                    #% THIS ONE IS SLOW WAIT OFR IT
                     jesusres_object.plot_vector_clustering()
                     
+                    # ENSEMBLE PLOTTING TO WORK ON
+                    act=jesusanalysis['Ensembles']['ActivationSequence']
                     
+         
                     
-                    pyr=np.argwhere(analysis.pyr_int_ids_and_indexes['pyr'][1]).flatten()
-                    inter=np.argwhere(analysis.pyr_int_ids_and_indexes['int'][1]).flatten()                   
+         
+            #%% COMPARE CELL TYPE RUNS  LOAD RUNS
+                    plt.close('all')
+
+                    analysis.unload_all_runs()
+                    
+                    analysis.load_jesus_results(mcmc_results[0])
+                    analysis.load_jesus_results(mcmc_results[1])
+                    analysis.load_jesus_results(mcmc_results[2])
+                    
+                    pyr=np.argwhere(analysis.pyr_int_ids_and_indexes['All_planes_rough']['pyr'][1]).flatten()
+                    inter=np.argwhere(analysis.pyr_int_ids_and_indexes['All_planes_rough']['int'][1]).flatten()                   
                     cell_subtype_runs={}
                     for run, run_object in  analysis.jesus_runs.items():
                        
                         ensemble_cell_identity={}
-                        run_object.load_analysis_from_file()
-                        # run_object.plotting_summary()
                         jesusanalysis=run_object.analysis
+                        run_object.plot_raster()
+                        run_object.plot_sorted_rasters()
+                        run_object.plot_networks()
+                        #% THIS ONE IS SLOW WAIT OFR IT
+                        run_object.plot_vector_clustering()
+                        
+                        
+                        
                         # dpi = 100
                         # fig = plt.figure(figsize=(16,9),dpi=dpi)
                         # plt.imshow(cell_subtype_runs[list(cell_subtype_runs.keys())[2]][2], cmap='binary', aspect='auto')
@@ -711,9 +811,9 @@ class TODO_Selection(tk.Tk):
                         
                         for ensemble, cells in  enumerate(jesusanalysis['Ensembles']['EnsembleNeurons']):
                        
-                            if 'Int_jesus' in run:
+                            if 'Interneurons_jesus' in run:
                                 cells=[inter[cell] for cell in cells ]
-                            if 'Pyr_jesus' in run:
+                            if 'Pyramidal_jesus' in run:
                                 cells=[pyr[cell] for cell in cells ]
 
                             ensemble_cell_identity['Ensemble: '+str(ensemble+1)]={'Pyramidals':[cell for cell in cells if cell in pyr],
@@ -723,11 +823,15 @@ class TODO_Selection(tk.Tk):
                             
                         cell_subtype_runs[run]=[run_object,ensemble_cell_identity, vectors]
                         
-                    an=cell_subtype_runs[list(cell_subtype_runs.keys())[0]][0].analysis
-                    cell_subtype_runs[list(cell_subtype_runs.keys())[0]][0].analysis['Ensembles']['EnsembleNeurons']
-                    combinedraster=cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_All_' in i][0]][2].astype('float')
-                    pyramidalraster= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Pyr_' in i][0]][2].astype('float')
-                    interneuronraster= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Int_' in i][0]][2].astype('float')
+                    # an=cell_subtype_runs[list(cell_subtype_runs.keys())[0]][0].analysis
+                    # cell_subtype_runs[list(cell_subtype_runs.keys())[0]][0].analysis['Ensembles']['EnsembleNeurons']
+                    
+                    #%% COMPARE ENSMEBLE SIMILARITES
+                    plt.close('all')
+
+                    combinedraster=cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_All_jesus' in i][0]][2].astype('float')
+                    pyramidalraster= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Pyramidal_' in i][0]][2].astype('float')
+                    interneuronraster= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Interneurons_' in i][0]][2].astype('float')
                         
                     adjacency_pyr=np.zeros((combinedraster.shape[0],pyramidalraster.shape[0] ))
                     adjacency_inter=np.zeros((combinedraster.shape[0],interneuronraster.shape[0] ))
@@ -771,13 +875,14 @@ class TODO_Selection(tk.Tk):
                     ax[1].set_xlabel('Interneuron Ensembles')
                     plt.tight_layout()
 
+                    filename = os.path.join(os.path.split(run_object.analysis_path)[0],f'{"_".join(run_object.input_options)}_{run_object.timestr}_ensmble_similarity.pdf')
+                    run_object.save_multi_image(filename)
 
-                    
-                    combined=cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_All_' in i][0]]
-                    pyramidals= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Pyr_' in i][0]]
-                   
+                    plt.close('all')
 
-                    interneurons= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Int_' in i][0]]
+                    combined=cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_All_jesus' in i][0]]
+                    pyramidals= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Pyramidal_' in i][0]]
+                    interneurons= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Interneurons_' in i][0]]
 
                     
                     similarities={}
@@ -841,7 +946,7 @@ class TODO_Selection(tk.Tk):
                         test_ensem_int.extend(list(val['Interneurons'].keys()))
 
                         twinaxes=[0,0]
-                        colors = ['r','k','k','k','k','k','k','k']
+                        colors = ['r','k','k','k','k','k','k','k','k','k','k']
 
                         pyrensesize.insert(0,fullsizepyr)
                         pyrsimilaritesenemble1.insert(0,fullsizepyr/fullsizetot)
@@ -856,7 +961,7 @@ class TODO_Selection(tk.Tk):
                         twinaxes[1]=ax[1].twinx()
                         twinaxes[1].plot(np.arange(0,len(intensesize)), intensesize,'b')
 
-                        twinaxes[0].set_ylim(0, 15)
+                        twinaxes[0].set_ylim(0, 30)
                         twinaxes[1].set_ylim(0, 35)
                         ax[0].set_title('Pyramidal Ensembles')
                         ax[0].set_ylabel('Similarity')
@@ -870,8 +975,14 @@ class TODO_Selection(tk.Tk):
                         twinaxes[1].set_ylabel('Cell Number')
                         fig.suptitle(test_ensem_l[0])
                         plt.tight_layout()
+                        
+                    filename = os.path.join(os.path.split(run_object.analysis_path)[0],f'{"_".join(run_object.input_options)}_{run_object.timestr}_ensemble_by_ensemble.pdf')
+                    run_object.save_multi_image(filename)
 
+                    plt.close('all')
+                    
 
+ #%% COMPARISON OF ESNEMBLE BETWEN THRE CELL YPES RUNS
 
                     indexes=((analysis.full_data['visstim_info']['Paradigm_Indexes']['first_drifting_set_first'],
                     analysis.full_data['visstim_info']['Paradigm_Indexes']['first_drifting_set_last']),
@@ -888,9 +999,13 @@ class TODO_Selection(tk.Tk):
                     
                     trace_type='mcmc_binary'
                     trace_type='mcmc_smoothed'
-
-                    plane='Plane1'
-                    ensmeble='Ensemble: '
+                    plane='All_planes_rough'
+                    ensmeble='Ensemble: 2'
+                    
+                    combined=cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_All_jesus' in i][0]]
+                    pyramidals= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Pyramidal_' in i][0]]
+                    interneurons= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Interneurons_' in i][0]]
+                    
                     
                     celtyp='Pyramidals'
                     ense=pyramidals[1][ensmeble][celtyp]
@@ -899,8 +1014,11 @@ class TODO_Selection(tk.Tk):
                     ense=interneurons[1][ensmeble][celtyp]
                     
                     cells=np.array(ense)
-                    cells=np.concatenate([np.array(ensemble_cell_identity[ensmeble]['Pyramidals']).astype('int'), np.array(ensemble_cell_identity[ensmeble]['Interneurons']).astype('int')])
+                    
+                    
+                    
                     celtyp='All'
+                    cells=np.concatenate([np.array(ensemble_cell_identity[ensmeble]['Pyramidals']).astype('int'), np.array(ensemble_cell_identity[ensmeble]['Interneurons']).astype('int')])
 
                    
 
@@ -926,13 +1044,17 @@ class TODO_Selection(tk.Tk):
                     
                     
                     
-                    ensemble=list(similarities.keys())[0]   
+                    ensemble=list(similarities.keys())[1]   
                     cells=copy.copy(combined[1][ensemble]['Pyramidals'])
                     cells.extend(combined[1][ensemble]['Interneurons'])
-                    for cell in cells:
-                        correctedcell=analysis.do_some_plotting(cell, trace_type, plane)
-                        analysis.plot_orientation(correctedcell,trace_type,plane)
-                    
+                    analysis.plot_orientation(352,trace_type,plane)
+
+                    # for cell in cells:
+                    #     #%%
+                    #     correctedcell=analysis.do_some_plotting(cell, trace_type, plane)
+                    #     #%%
+                    #     analysis.plot_orientation(correctedcell,trace_type,plane)
+                    # #%%
                     
                     
                     all_mena_act=[]
@@ -1048,7 +1170,6 @@ class TODO_Selection(tk.Tk):
                     #         celltype='Pyramidal Cell'
                     #     elif  cell in    inter:
                     #         celltype='Interneuron'
-
                     #     print(plane+'\nMatlab cell: '+str( matlabcell)+'\nPython cell :'+str(cell)+'\n' + celltype)
                     #     print(promiscous_cells_interneurons)
                     #     plot_orientation(cell, trace_type, plane)  
@@ -1060,15 +1181,33 @@ class TODO_Selection(tk.Tk):
                     analysis.load_allen_analysis()
                     self.destroy()
                     return
-                    matrix='mcmc_smoothed'
-                    plane='All_planes_rough'
-                    plane='Plane1'
                     analysis.allen_analysis.set_up_drifting_gratings_parameters()
                     analysis.allen_analysis.do_AllenA_analysis(plane, matrix)
-                    peak_info=analysis.allen_analysis.peak
-                    reponse_info=analysis.allen_analysis.response 
+                    # peak_info=analysis.allen_analysis.peak
+                    # reponse_info=analysis.allen_analysis.response 
+                
+                    print( trace_types)
+                    print(planes)
+                    print(paradigms)
+                    print(selected_cells_options)
+                    plane=planes[0]
+                    matrix=trace_types[3]
+                    cell_selecton_index=1
+                    cell_type=selected_cells_options[cell_selecton_index]
+
+                    pyr=np.argwhere(analysis.pyr_int_ids_and_indexes['All_planes_rough']['pyr'][1]).flatten()
+                    inter=np.argwhere(analysis.pyr_int_ids_and_indexes['All_planes_rough']['int'][1]).flatten()     
+                    all_cells=np.concatenate((pyr, inter))
+                    cells=(all_cells,pyr,inter)
+
+
                     
-                    analysis.do_PCA(analysis.allen_analysis.mean_sweep_response.iloc[:,:-1], analysis.allen_analysis.sweep_response.iloc[:,:-1], analysis.stimulus_table['drifting_gratings'])
+                    for matrix in trace_types:
+                        for i, cell_type in enumerate( selected_cells_options[:-1]):
+                            analysis.allen_analysis.do_AllenA_analysis(plane, matrix)
+                            selectedcells=cells[i]
+                            params=(matrix,plane,cell_type)
+                            analysis.do_PCA(analysis.allen_analysis.mean_sweep_response.iloc[:,selectedcells], analysis.allen_analysis.sweep_response.iloc[:,selectedcells], analysis.full_data['visstim_info']['Drifting_Gratings']['stimulus_table'], params)
 
                     
                              
