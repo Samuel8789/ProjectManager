@@ -137,7 +137,7 @@ elif platform == "linux" or platform == "linux2":
     
     to do 
         check new breeding corretc cages
-        add all genoitypes to code
+        add all genoitypes to code 
     
     
     

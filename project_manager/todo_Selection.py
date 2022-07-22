@@ -505,9 +505,9 @@ class TODO_Selection(tk.Tk):
                     trace_types=['demixed', 'denoised', 
                      'dfdt_raw',  'dfdt_smoothed', 'dfdt_binary',
                      'foopsi_raw', 'foopsi_smoothed','foopsi_binary',
-                     'mcmc_raw','mcmc_smoothed','mcmc_binary']
-                    trace_type=trace_types[4]
-                    final_binary_trace_types=['dfdt_binary','mcmc_binary']
+                     'mcmc_raw','mcmc_smoothed','mcmc_binary','mcmc_scored_binary']
+                    trace_type=trace_types[-1]
+                    final_binary_trace_types=['dfdt_binary','mcmc_binary','mcmc_scored_binary']
     
                     
                     paradigms=['Movie1','Spontaneous','Drifting_Gratings','Movie3']
@@ -710,7 +710,14 @@ class TODO_Selection(tk.Tk):
                         for selected_cells in selected_cells_options[:3]:
                             activity_arrays= analysis.get_raster_with_selections(trace_type, plane, selected_cells, paradigm=paradigm) 
                             analysis.run_jesus_analysis(activity_arrays)
-                        
+                            
+                    paradigm=paradigms[2]
+                    plane = planes[0]
+                    trace_type= final_binary_trace_types[-1]
+                    for selected_cells in selected_cells_options[:3]:
+                        activity_arrays= analysis.get_raster_with_selections(trace_type, plane, selected_cells, paradigm=paradigm) 
+                        analysis.run_jesus_analysis(activity_arrays)
+                
                     #%% CHECKING JESUS RESULTS
                     
                     def intersection(lst1, lst2):
@@ -737,8 +744,10 @@ class TODO_Selection(tk.Tk):
 
 
                     #results by trace type
-                    mcmc_results=[i for i in  analysis.jesus_results_list if (('mcmc' in i) and ('.pkl' in i))]
+                    mcmcresults=[i for i in  analysis.jesus_results_list if (('mcmc' in i) and ('.pkl' in i))]
                     dfdtresults=[i for i in  analysis.jesus_results_list if (('dfdt' in i) and ('.pkl' in i))]
+                    scoredmcmcresults=[i for i in  analysis.jesus_results_list if (('mcmc_scored' in i) and ('.pkl' in i))]
+
 
      
                     pyr_grat=intersection(pyr_results, drift_grat_results)
@@ -749,13 +758,13 @@ class TODO_Selection(tk.Tk):
                     #%% LOAdING JESUS RESULTS 
                     # results get loaded to jesus runs to compare betwen runs
                     analysis.unload_all_runs()
-                    analysis.load_jesus_results(mcmc_results[0])
+                    analysis.load_jesus_results(mcmcresults[0])
                     # analysis.load_jesus_results(pyr_grat[0])
                     # analysis.load_jesus_results(int_grat[0])
                     # analysis.load_jesus_results(all_cells_grat[0])
                     #%% ANALYSIS SINGLE RESULT RUN
                     analysis.unload_all_runs()
-                    analysis.load_jesus_results(mcmc_results[0])
+                    analysis.load_jesus_results(scoredmcmcresults[0])
                     analysis.jesus_runs
                     jesusres_object=analysis.jesus_runs[list(analysis.jesus_runs.keys())[0]]
                     jesusres_object.load_analysis_from_file()
@@ -778,12 +787,15 @@ class TODO_Selection(tk.Tk):
          
             #%% COMPARE CELL TYPE RUNS  LOAD RUNS
                     plt.close('all')
+                    plot=1
+                    analysis.jesus_runs
+
 
                     analysis.unload_all_runs()
                     
-                    analysis.load_jesus_results(mcmc_results[0])
-                    analysis.load_jesus_results(mcmc_results[1])
-                    analysis.load_jesus_results(mcmc_results[2])
+                    analysis.load_jesus_results(scoredmcmcresults[0])
+                    analysis.load_jesus_results(scoredmcmcresults[1])
+                    analysis.load_jesus_results(scoredmcmcresults[2])
                     
                     pyr=np.argwhere(analysis.pyr_int_ids_and_indexes['All_planes_rough']['pyr'][1]).flatten()
                     inter=np.argwhere(analysis.pyr_int_ids_and_indexes['All_planes_rough']['int'][1]).flatten()                   
@@ -792,11 +804,12 @@ class TODO_Selection(tk.Tk):
                        
                         ensemble_cell_identity={}
                         jesusanalysis=run_object.analysis
-                        run_object.plot_raster()
-                        run_object.plot_sorted_rasters()
-                        run_object.plot_networks()
-                        #% THIS ONE IS SLOW WAIT OFR IT
-                        run_object.plot_vector_clustering()
+                        if plot:
+                            run_object.plot_raster()
+                            run_object.plot_sorted_rasters()
+                            run_object.plot_networks()
+                            #% THIS ONE IS SLOW WAIT OFR IT
+                            run_object.plot_vector_clustering()
                         
                         
                         
@@ -1000,7 +1013,7 @@ class TODO_Selection(tk.Tk):
                     trace_type='mcmc_binary'
                     trace_type='mcmc_smoothed'
                     plane='All_planes_rough'
-                    ensmeble='Ensemble: 2'
+                    ensmeble='Ensemble: 3'
                     
                     combined=cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_All_jesus' in i][0]]
                     pyramidals= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Pyramidal_' in i][0]]
@@ -1010,15 +1023,15 @@ class TODO_Selection(tk.Tk):
                     celtyp='Pyramidals'
                     ense=pyramidals[1][ensmeble][celtyp]
                     
-                    celtyp='Interneurons'
-                    ense=interneurons[1][ensmeble][celtyp]
+                    # celtyp='Interneurons'
+                    # ense=interneurons[1][ensmeble][celtyp]
                     
                     cells=np.array(ense)
                     
                     
                     
-                    celtyp='All'
-                    cells=np.concatenate([np.array(ensemble_cell_identity[ensmeble]['Pyramidals']).astype('int'), np.array(ensemble_cell_identity[ensmeble]['Interneurons']).astype('int')])
+                    # celtyp='All'
+                    # cells=np.concatenate([np.array(ensemble_cell_identity[ensmeble]['Pyramidals']).astype('int'), np.array(ensemble_cell_identity[ensmeble]['Interneurons']).astype('int')])
 
                    
 
@@ -1039,10 +1052,88 @@ class TODO_Selection(tk.Tk):
                     fig.supylabel('Cell')
                     fig.suptitle(f'{celtyp}_{ensmeble}')
                     
+#%%       
+                    combined=cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_All_jesus' in i][0]]
+                    pyramidals= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Pyramidal_' in i][0]]
+                    interneurons= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Interneurons_' in i][0]]
 
                     
+                    selectedtun=interneurons
+                    
+                    plt.close('all')
+                    for idx in range(len(selectedtun[1].keys())):
+                        print(selectedtun[1][list(selectedtun[1].keys())[idx]])
+
+                    idx=1
+                    ensmeble=list(selectedtun[1].keys())[idx]
+                    ens=selectedtun[0].analysis['Ensembles']
+
+                    allcells=selectedtun[1][ensmeble]
+                    ens['VectorID']
+                    ens['EnsembleNeurons'][idx]
+                    seq=ens['ActivationSequence']
+                    activation=ens['ActivityBinary']
+                    
+                    activity_arrays= analysis.get_raster_with_selections(trace_type,plane,selected_cells, paradigm, drifting_options)
+
+                    traces=activity_arrays[2][ens['EnsembleNeurons'][idx],:]
+                    cells=ens['EnsembleNeurons'][idx]
+                    meanacti=[]
+                    cell=389
+                    for cell in cells:
+                        s2,_=analysis.plot_orientation(cell,trace_type,plane)
+                        meanacti.append((s2))
+                        
+                        analysis.plot_blank_sweeps(cell, trace_type, plane)
+                    #%%
+
+                    analysis.full_data['visstim_info']['Drifting_Gratings']['stimulus_table']
+                    
+                    indexes=((analysis.full_data['visstim_info']['Paradigm_Indexes']['first_drifting_set_first'],
+                    analysis.full_data['visstim_info']['Paradigm_Indexes']['first_drifting_set_last']),
+                    (analysis.full_data['visstim_info']['Paradigm_Indexes']['second_drifting_set_first'],
+                    analysis.full_data['visstim_info']['Paradigm_Indexes']['second_drifting_set_last']),
+                    (analysis.full_data['visstim_info']['Paradigm_Indexes']['third_drifting_set_first'],
+                    analysis.full_data['visstim_info']['Paradigm_Indexes']['third_drifting_set_last'])) 
+                    
+                    # tranfrorm situmlus table to 0nly grtaing frames
+                    
+                    firstgrat=analysis.full_data['visstim_info']['Drifting_Gratings']['stimulus_table']['start']<indexes[1][0]
+                    secondgrat=(analysis.full_data['visstim_info']['Drifting_Gratings']['stimulus_table']['start']>indexes[0][1]) & (analysis.full_data['visstim_info']['Drifting_Gratings']['stimulus_table']['start']<indexes[2][0])
+                    thirdgrat=analysis.full_data['visstim_info']['Drifting_Gratings']['stimulus_table']['start']>indexes[1][1]
                     
                     
+                    firssubtract=indexes[0][0]
+                    secondsubstract=indexes[1][0]-indexes[0][1]
+                    thirdsubstract=indexes[2][0]-indexes[1][1]
+                    
+                    netable=   analysis.full_data['visstim_info']['Drifting_Gratings']['stimulus_table'].copy()
+        
+                    netable['start']=netable['start']-firssubtract
+                    netable['end']=netable['end']-firssubtract
+                    
+                    
+                    netable['start'][netable['start']>indexes[0][1]]=netable['start'][netable['start']>indexes[0][1]]-secondsubstract
+                    netable['end'][netable['end']>indexes[0][1]]=netable['end'][netable['end']>indexes[0][1]]-secondsubstract
+
+                    netable['start'][netable['start']>(indexes[1][1]-secondsubstract)]=netable['start'][netable['start']>(indexes[1][1]-secondsubstract)]-thirdsubstract
+                    netable['end'][netable['end']>(indexes[1][1]-secondsubstract)]=netable['end'][netable['end']>(indexes[1][1]-secondsubstract)]-thirdsubstract
+
+                    substim=netable[(netable['orientation']==90)]
+                    
+                    
+                    pixel_per_bar = 4
+                    dpi = 100
+                
+                    fig, ax = plt.subplots(1,  figsize=(16,9), dpi=dpi, sharex=True)
+                    ax.imshow(activation, cmap='binary', aspect='auto',
+                        interpolation='nearest', norm=mpl.colors.Normalize(0, 0.01))
+                    for j in substim['start'].values:
+            
+                        ax.axvspan(xmin=j , xmax=j+33, color='red', alpha=0.2)
+
+                    
+                    #%%
                     
                     ensemble=list(similarities.keys())[1]   
                     cells=copy.copy(combined[1][ensemble]['Pyramidals'])
@@ -1058,12 +1149,28 @@ class TODO_Selection(tk.Tk):
                     
                     
                     all_mena_act=[]
+                    ensmeble
+                    cells=copy.copy(pyramidals[1][ensmeble]['Pyramidals'])
+                    meanacti=[]
+                    for cell in cells:
+                        s2,_=analysis.plot_orientation(cell,trace_type,plane)
+                        meanacti.append((s2))
+
+
+                    meanoriactensemble=np.zeros((4,1))
+                    test=list(zip(*meanacti))
+                    meani=[]
+                    for j,i in enumerate(test):
+                        meanoriactensemble[j]=(np.mean(i))
+                    all_mena_act.append(meanoriactensemble)
+                    
+                    
+                    
                     for ensemble in similarities['Ensemble: 1']['Pyramidals'].keys():
                         cells=copy.copy(pyramidals[1][ensemble]['Pyramidals'])
                         meanacti=[]
                         for cell in cells:
-                            correctedcell=analysis.do_some_plotting(cell, trace_type, plane)
-                            s2,_=analysis.plot_orientation(correctedcell,trace_type,plane)
+                            s2,_=analysis.plot_orientation(cell,trace_type,plane)
                             meanacti.append((s2))
     
     
@@ -1087,7 +1194,6 @@ class TODO_Selection(tk.Tk):
                         cells=copy.copy(interneurons[1][ensemble]['Interneurons'])
                         meanacti=[]
                         for cell in cells:
-                            correctedcell=analysis.do_some_plotting(cell, trace_type, plane)
                             s2,_=analysis.plot_orientation(correctedcell,trace_type,plane)
                             meanacti.append((s2))
     
@@ -1117,7 +1223,6 @@ class TODO_Selection(tk.Tk):
                         
                         meanacti=[]
                         for cell in cells:
-                            correctedcell=analysis.do_some_plotting(cell, trace_type, plane)
                             s2,_=analysis.plot_orientation(correctedcell,trace_type,plane)
                             meanacti.append((s2))
     
@@ -1181,36 +1286,222 @@ class TODO_Selection(tk.Tk):
                     analysis.load_allen_analysis()
                     self.destroy()
                     return
-                    analysis.allen_analysis.set_up_drifting_gratings_parameters()
-                    analysis.allen_analysis.do_AllenA_analysis(plane, matrix)
-                    # peak_info=analysis.allen_analysis.peak
-                    # reponse_info=analysis.allen_analysis.response 
+                #%% CREATING SWEEP RESPONSE BASED ON SELECTIONS
+                    print( trace_types)
+                    print(planes)
+                    print(paradigms)
+                    print(selected_cells_options)
+                    plane=planes[0]
+                    matrix=trace_types[-1]
+                    allen_mock=analysis.allen_analysis
+                    allen_mock.set_up_drifting_gratings_parameters()
+                    allen_mock.do_AllenA_analysis(plane, matrix)
+                    allen_mock.response=allen_mock.get_response()
+                    response=allen_mock.response
+                    
+                    allen_mock.peak=allen_mock.get_peak()
+                    peak=allen_mock.peak
+                    
+                    activity_arrays= analysis.get_raster_with_selections(trace_type,plane,selected_cells, paradigm, drifting_options)
+                    tom=pd.DataFrame([cell[1] for cell in activity_arrays[4][3]])
+                    
+                    peak['Tomato'] = tom
+                 
+                    
+                    
+                    peakinter=peak[peak['Tomato']=='Tomato +']
+                    peakpyr=peak[peak['Tomato']=='Tomato -']
+                    peak_dff_min=0.02
+                    peakfilteredinactive=peak[peak.peak_dff_dg>peak_dff_min]
+                    
+                    peakinterfiltered=peakfilteredinactive[peakfilteredinactive['Tomato']=='Tomato +']
+                    peakpyrfiltered=peakfilteredinactive[peakfilteredinactive['Tomato']=='Tomato -']
+
+
+                    #%% SINGLE CELL ORIENTATIO PLOTTING
+                    cell=22
+                    allen_mock.open_star_plot(include_labels=True,cell_index=cell)
+                    s2,_=analysis.plot_orientation(cell,trace_type,plane)
+                    # analysis.plot_blank_sweeps(cell, trace_type, plane)
+                    #%% FINDE UNIQUE ENSMEBLE CELLS AND PROMISCOUS
+                    import itertools
+
+                    combined=cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_All_jesus' in i][0]]
+                    pyramidals= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Pyramidal_' in i][0]]
+                    interneurons= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Interneurons_' in i][0]]
+
+                    
+                    selectedtun=interneurons
+                    sets=[]
+                    for idx in range(len(selectedtun[1].keys())):
+                       sets.append(set(selectedtun[1][list(selectedtun[1].keys())[idx]]['Interneurons']))
+                    fullsharedcells=[]
+                    for i,seti in enumerate(sets):
+                        print(f'Ensemble: {i} cell number {len(seti)}')
+                        print(seti)
+                        totalsharedcels=[]
+
+                        for j, s in enumerate(sets):
+                            if j!=i:
+                                inter=seti.intersection(s)
+                                totalsharedcels.append(inter)
+    
+                                print(f'Ensemble: {j} shared {len(inter)}')
+                                
+                                
+
+
+                        flatten_list = list(itertools.chain(*totalsharedcels))
+
+                        fullsharedcells.append((set(flatten_list), len(flatten_list)/len(seti))   )        
+                        
+                        
+                    
+                    #%% ALL ESNEMBLE CELLS ORIENTATION PLOTTING WITH JESUS ENSEMBLES
+                    
+                    combined=cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_All_jesus' in i][0]]
+                    pyramidals= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Pyramidal_' in i][0]]
+                    interneurons= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Interneurons_' in i][0]]
+
+                    
+                    selectedtun=pyramidals
+                    
+                    plt.close('all')
+                    for idx in range(len(selectedtun[1].keys())):
+                        print(selectedtun[1][list(selectedtun[1].keys())[idx]])
+                        
+                    celltypes=['Pyramidals', 'Interneurons']
+                    clltypeidx=0
+                    esnembleidx=1
+                    '''
+                    pyramidal ensembles dfdt smpoothed 
+                    esnembel0 315 orientation
+                    esnembel1 135 centered
+                    esnembel2 90 orienation
+                    esnembel3 315 orientation
+                    esnembel4 45 orientation 225
+                    esnembel5 Mixed
+
+                    '''
+                    '''
+                    combined ensemble interneuronss scoredmccmbinary
+                    esnembel0 mixed inter
+                    esnembel1 90 angle like ensemble1 pyramidal plus one tuned interneruosn
+                    esnembel2 mixed inter
+                    esnembel3 stim selecetive only inter
+                    esnembel4 tuned to 0 mistly mixed
+                    esnembel5 mixed mostly
+                    esnembel6 mixed mostly
+                    esnembel7 mixed mostly and tuned 
+                    esnembel8    mixed                 
+
+                    '''
+                    '''
+                    combined ensemble pyrs scoredmccmbinary
+                    esnembel0 135 and mixed
+                    esnembel1 90 and mixed
+                    esnembel2 
+                    esnembel3 
+                    esnembel4 
+                    esnembel5 
+                    esnembel6 
+                    esnembel7
+                    esnembel8                     
+
+                    '''
+                    '''
+                    pyramida ensembles scoredmccmbinary
+                    esnembel0 45 with some 0 and some of opossie direcion
+                    esnembel1 90 with some 135
+                    esnembel2 270 with some 90
+                    esnembel3 225 
+                    esnembel4 315 with 0
+                    all in general have mixed form adjacent angles
+
+                    '''
+                    '''
+                    interneurons ensembles scoredmccmbinary
+                    esnembel0  stimulus responsive higher temporal freqs
+                    esnembel1  stim reposnsibv , some tuned cells and lower temp freq
+                    esnembel2  stim responsive mixed
+                    esnembel3 stim responsibve lower frequencies, and some tuned
+                    esnembel4 
+
+                    '''
+                    
+
+                    cells= selectedtun[1][list(selectedtun[1].keys())[esnembleidx]][celltypes[clltypeidx]]
+                    # locomotioninterneurons=peak.iloc[cells]
+                    
+                    for cell in selectedtun[1][list(selectedtun[1].keys())[esnembleidx]][celltypes[clltypeidx]]:
+                        allen_mock.open_star_plot(include_labels=True,cell_index=cell)
+                        s2,_=analysis.plot_orientation(cell,trace_type,plane)
+                        
+                        
+                   
+                    
+                    
+                    #%% GENERAL POPULATION PROPERTIES OF TUNING SIGLE CELLS
+                    celltypes=['All', 'Tomato +', 'Tomato -']
+                    celltype=celltypes[2]
+                    for celltype in celltypes:
+                        allen_mock.plot_orientation_selectivity(peak_dff_min=0.02, cell_type=celltype)
+                    for celltype in celltypes:
+                        allen_mock.plot_direction_selectivity(peak_dff_min=0.02,cell_type=celltype)
+                    for celltype in celltypes:
+                        allen_mock.plot_preferred_direction(peak_dff_min=0.02, cell_type=celltype)
+                    for celltype in celltypes:
+                        allen_mock.plot_preferred_temporal_frequency(peak_dff_min=0.02, cell_type=celltype)
+
+                
+
+                
+                #%% PCA
+             
                 
                     print( trace_types)
                     print(planes)
                     print(paradigms)
                     print(selected_cells_options)
                     plane=planes[0]
-                    matrix=trace_types[3]
-                    cell_selecton_index=1
+                    matrix=trace_types[-1]
+                    cell_selecton_index=2
                     cell_type=selected_cells_options[cell_selecton_index]
 
                     pyr=np.argwhere(analysis.pyr_int_ids_and_indexes['All_planes_rough']['pyr'][1]).flatten()
                     inter=np.argwhere(analysis.pyr_int_ids_and_indexes['All_planes_rough']['int'][1]).flatten()     
                     all_cells=np.concatenate((pyr, inter))
                     cells=(all_cells,pyr,inter)
-
-
                     
-                    for matrix in trace_types:
-                        for i, cell_type in enumerate( selected_cells_options[:-1]):
-                            analysis.allen_analysis.do_AllenA_analysis(plane, matrix)
-                            selectedcells=cells[i]
-                            params=(matrix,plane,cell_type)
-                            analysis.do_PCA(analysis.allen_analysis.mean_sweep_response.iloc[:,selectedcells], analysis.allen_analysis.sweep_response.iloc[:,selectedcells], analysis.full_data['visstim_info']['Drifting_Gratings']['stimulus_table'], params)
-
                     
-                             
+                    analysis.allen_analysis.do_AllenA_analysis(plane, matrix)
+                    selectedcells=cells[cell_selecton_index]
+                    params=(matrix,plane,cell_type)
+                    #%%
+                    analysis.do_PCA(analysis.allen_analysis.mean_sweep_response.iloc[:,selectedcells], analysis.allen_analysis.sweep_response.iloc[:,selectedcells], analysis.full_data['visstim_info']['Drifting_Gratings']['stimulus_table'], params)
+
+                #%%
+                    
+                
+
+    
+                    
+                    # for matrix in  trace_types[8:]+ trace_types[3:5]:
+                    #     for i, cell_type in enumerate( selected_cells_options[:-1]):
+                    #         analysis.allen_analysis.do_AllenA_analysis(plane, matrix)
+                    #         selectedcells=cells[i]
+                    #         params=(matrix,plane,cell_type)
+                    #         analysis.do_PCA(analysis.allen_analysis.mean_sweep_response.iloc[:,selectedcells], analysis.allen_analysis.sweep_response.iloc[:,selectedcells], analysis.full_data['visstim_info']['Drifting_Gratings']['stimulus_table'], params)
+
+                       
+                    matrix=trace_types[-1]
+
+                    for i, cell_type in enumerate( selected_cells_options[:-1]):
+                        analysis.allen_analysis.do_AllenA_analysis(plane, matrix)
+                        selectedcells=cells[i]
+                        params=(matrix,plane,cell_type)
+                        analysis.do_PCA(analysis.allen_analysis.mean_sweep_response.iloc[:,selectedcells], analysis.allen_analysis.sweep_response.iloc[:,selectedcells], analysis.full_data['visstim_info']['Drifting_Gratings']['stimulus_table'], params)
+                         
 #%% yuriy ensembles
 
                 if 'do_yuriy_ensembles'  in self.selected_things_to_do:
