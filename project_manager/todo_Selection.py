@@ -77,7 +77,10 @@ class TODO_Selection(tk.Tk):
         'do_visualstim_indexing',
         'do_jesus_ensemble',
         'do_tuning_allen',
-        'do_yuriy_ensembles']
+        'do_yuriy_ensembles',
+        #analysis no dtamanaging
+        'do_cloud_results_only'
+        ]
         
         self.gui=0
 
@@ -275,7 +278,7 @@ class TODO_Selection(tk.Tk):
                     prairie_session.process_all_imaged_mice()      
                     
 #%% data analysis                   
-        elif [todo for todo in self.selected_things_to_do if todo in self.things_to_do[12:]] :   
+        elif [todo for todo in self.selected_things_to_do if todo in self.things_to_do[12:-1]] :   
             
             lab=self.projectManager.initialize_a_project('LabNY', self.gui)   
             MouseDat=lab.database
@@ -1509,7 +1512,48 @@ class TODO_Selection(tk.Tk):
                     self.destroy()
                     return
                     
-      
+        elif [todo for todo in self.selected_things_to_do if 'cloud' in todo]:
+            
+            lab=self.projectManager.initialize_a_project('LabNY', self.gui)   
+            MouseDat=lab.database
+            lab.do_datamanaging(full=False)
+            datamanaging=lab.datamanaging
+            
+            self.to_return=[lab, [],MouseDat,datamanaging,[],[], [],[],[],[], [],[]]
+            
+            # select mouse
+            mousenamesinter=['SPKG','SPHV']
+            mousenameschand=['SPKQ','SPKS','SPJZ','SPJF','SPJG','SPKU', 'SPKW','SPKY']
+            
+            #spKQ chandeliers plane1 18, 27, 121, 228
+            #spKQ chandeliers plane2 52(fist pass caiman)
+
+            # mousename=mousenameschand[0]
+            mousename=mousenamesinter[0]
+
+            mouse_object=datamanaging.all_experimetal_mice_objects[mousename]
+            
+            # select aquisition
+            allacqs=mouse_object.all_mouse_acquisitions
+            pprint(list(allacqs.keys()))
+            # selectedaqposition = int(input('Choose Aq position.\n'))
+            selectedaqposition=1
+            acq=allacqs[list(allacqs.keys())[selectedaqposition]]
+            
+            # get datasets
+            acq.get_all_database_info()
+            acq.load_results_analysis(new_full_data=False) 
+            analysis=acq.analysis_object
+            full_data=analysis.full_data
+        
+            print(acq.aquisition_name)
+            self.to_return[5:]=[ mousename,  mouse_object , allacqs, selectedaqposition, acq, analysis,full_data]
+            
+            
+            
+            
+            
+            pass
     if __name__ == "__main__":
         
         
