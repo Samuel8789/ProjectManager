@@ -57,12 +57,7 @@
 #     conda config --set auto_update_conda false
 #     conda config --remove channels conda-forge
     
-# linux caiman 
-# git clone https://github.com/flatironinstitute/CaImAn
-# cd CaImAn/
-# mamba env create -f environment.yml -n caiman
-# source activate caiman
-# pip install -e .    
+
     
     
     
@@ -98,6 +93,8 @@ from pprint import pprint
 from project_manager.todo_Selection import TODO_Selection
 
 
+
+# SET GITHUB TOKEN PATH
 house_PC='DESKTOP-V1MT0U5'
 lab_PC='DESKTOP-OKLQSQS'
 small_laptop_ubuntu='samuel-XPS-13-9380'
@@ -156,7 +153,7 @@ elif platform == "linux" or platform == "linux2":
   $(command -v gnumfmt || echo numfmt) --field=2 --to=iec-i --suffix=B --padding=7 --round=nearest
 
 
-git filter-branch --index-filter "git rm -rf --cached --ignore-unmatch   boc/cell_specimens.json" HEAD;
+git filter-branch --index-filter "git rm -rf --cached --ignore-unmatch   ny_lab/TestOthers/desktop_cam_20220614-161717.avi" HEAD;
 git for-each-ref --format="%(refname)" refs/original/ | while read ref; do git update-ref -d $ref; done
 
 
@@ -181,104 +178,17 @@ git reflog expire --expire=now --all && git gc --prune=now --aggressive
 #     print('internet')
 # except socket.error as ex:
 #     print(ex)
-#%% select analysys
+#%% initialize the project manager
 projectManager=ProjectManager(githubtoken_path, computer, platform)
 # ProjectManager.clone_project('LabNY')   
 #%%
 selection=TODO_Selection(projectManager)
 selection.mainloop()
 
-
 #%%
-
-
 lab, allen, MouseDat, datamanaging,session_name, mousename, mouse_object, allacqs, selectedaqposition, acq, analysis,full_data=selection.to_return
 
 
-
-
-
-
-#%%
-   
-# testiing for negative correlation\ and stuff, compare jesus method with standard correlation and beware of the differences
-# from jesusMiscFunc import get_significant_network_from_raster, filter_raster_by_network, find_peaks, change_raster_bin_size, get_peak_indices, get_adjacency_from_raster
-# from scipy.stats import zscore
-
-
-# simpletest=np.array(([1 ,1 ,1, 1 ,0, 0, 0, 0],[0, 0, 0, 0, 1, 1, 1, 1], [1 ,1 ,1, 1 ,0, 0, 0, 0],[0, 1, 0, 0, 1, 1, 0, 1],[1 ,0 ,0, 1 ,1, 0, 0, 1],[0, 0, 1, 0, 0, 0, 1, 1]))
-
-# mat=get_adjacency_from_raster(simpletest)
-# matp=np.corrcoef(simpletest)
-# matj=get_adjacency_from_raster(simpletest,'jaccard')
-
-# distance = squareform(pdist(simpletest, 'cosine'))
-# distancec = squareform(pdist(simpletest, 'correlation'))
-# distancej = squareform(pdist(simpletest, 'jaccard'))
-
-
-# simpletest2=np.array(([1 ,1 ,1, 1 ,-1, -1, -1,-1],[-1, -1, -1,-1, 1, 1, 1, 1]))
-
-# mat2=get_adjacency_from_raster(simpletest2 ,)
-# matp2=get_adjacency_from_raster(simpletest2,'pearson')
-# matj2=get_adjacency_from_raster(simpletest2,'jaccard')
-
-# distance2 = squareform(pdist(simpletest2, 'cosine'))
-# distancec2 = squareform(pdist(simpletest2, 'correlation'))
-# distancej2 = squareform(pdist(simpletest2, 'jaccard'))
-
-
-
-
-
-# mat=get_adjacency_from_raster(jesusres_object.analysis['Raster'] ,)
-# matp=np.corrcoef(jesusres_object.analysis['Raster'])*(1-np.eye(jesusres_object.analysis['Raster'].shape[0]))
-# fig, ax1 = plt.subplots(1)
-# pos=ax1.imshow(matp, cmap='jet', )
-# fig.colorbar(pos, ax=ax1)
-
-
-# scoremat=zscore(matp)
-# fig, ax1 = plt.subplots(1)
-# pos=ax1.imshow(scoremat, cmap='jet', )
-# fig.colorbar(pos, ax=ax1)
-# from scipy.spatial.distance import squareform, pdist
-
-
-
-# distance = squareform(pdist(jesusres_object.analysis['Raster'], 'cosine'))
-   
-# sim = 1-distance
-# fig, ax1 = plt.subplots(1)
-# pos=ax1.imshow(sim, cmap='jet', )
-# fig.colorbar(pos, ax=ax1)
-
-# fig, ax = plt.subplots(1)
-# N, bins, patches = ax.hist(matp.flatten(), bins=50) #initial color of all bins
-
-
-# test=np.histogram(sim)
-
-
-   
-
-
-
 #%%  github to do
-# #%% git managing TO WORK ON IT
+projectManager.check_project_git_status(projectManager)
 
-# # labRepo=lab.repo_object
-
-# # assert not labRepo.is_dirty()  # check the dirty state
-# # labRepo.untracked_files  
-
-
-# # assert os.path.isdir(labRepo.working_tree_dir)                   # directory with your work files
-# # assert labRepo.git_dir.startswith(labRepo.working_tree_dir)  # directory containing the git repository
-
-#               # the commit pointed to by head called master
-# index = labRepo.index
-# count_modified_files = len(labRepo.index.diff(None))
-# count_staged_files = len(labRepo.index.diff("HEAD"))
-# commits = list(labRepo.iter_commits('master'))
-#%%

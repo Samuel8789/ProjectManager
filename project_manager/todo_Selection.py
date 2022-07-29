@@ -468,11 +468,11 @@ class TODO_Selection(tk.Tk):
                 
                 # select mouse
                 mousenamesinter=['SPKG','SPHV']
-                mousenameschand=['SPKQ','SPKS','SPJZ','SPJF','SPJG']
+                mousenameschand=['SPKQ','SPKS','SPJZ','SPJF','SPJG','SPKU', 'SPKW','SPKY']
                 
                 #spKQ chandeliers plane1 18, 27, 121, 228
                 #spKQ chandeliers plane2 52(fist pass caiman)
-
+ 
                 # mousename=mousenameschand[0]
                 mousename=mousenamesinter[0]
 
@@ -487,12 +487,12 @@ class TODO_Selection(tk.Tk):
                 
                 # get datasets
                 acq.get_all_database_info()
-                acq.load_results_analysis(new_full_data=False) 
+                acq.load_results_analysis(new_full_data=True) 
                 # acq.load_results_analysis(new_full_data=True) 
                 analysis=acq.analysis_object
                 full_data=analysis.full_data
             
-                
+                print(acq.aquisition_name)
                 self.to_return[5:]=[ mousename,  mouse_object , allacqs, selectedaqposition, acq, analysis,full_data]
 #%% analysis exploration 
 
@@ -704,7 +704,7 @@ class TODO_Selection(tk.Tk):
                                     analysis.run_jesus_analysis(activity_arrays)
                                     
                                     
-                    paradigm=paradigms[2]
+                    paradigm=paradigms[3]
                     plane = planes[0]
                     for trace_type in final_binary_trace_types[0:]:
                         for selected_cells in selected_cells_options[:3]:
@@ -758,13 +758,13 @@ class TODO_Selection(tk.Tk):
                     #%% LOAdING JESUS RESULTS 
                     # results get loaded to jesus runs to compare betwen runs
                     analysis.unload_all_runs()
-                    analysis.load_jesus_results(mcmcresults[0])
+                    analysis.load_jesus_results(mcmcresults[16])
                     # analysis.load_jesus_results(pyr_grat[0])
                     # analysis.load_jesus_results(int_grat[0])
                     # analysis.load_jesus_results(all_cells_grat[0])
                     #%% ANALYSIS SINGLE RESULT RUN
                     analysis.unload_all_runs()
-                    analysis.load_jesus_results(scoredmcmcresults[0])
+                    analysis.load_jesus_results(scoredmcmcresults[-1])
                     analysis.jesus_runs
                     jesusres_object=analysis.jesus_runs[list(analysis.jesus_runs.keys())[0]]
                     jesusres_object.load_analysis_from_file()

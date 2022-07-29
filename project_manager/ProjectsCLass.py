@@ -27,6 +27,7 @@ class Project():
     def __init__(self, project_name, githubtoken_path, computer, platform):
         
         self.project_name=project_name
+        print(f'Loading project {self.project_name}')
         Project.platform=platform
         Project.computer=computer
         
@@ -132,12 +133,12 @@ class Project():
             if not os.path.exists(location):
                 os.makedirs(location)
             else:            
-                print('project already there')
+                print(f'project folder {location} already there')
                                       
     def read_repo_status(self): 
             try:
                 _ = git.Repo(self.project_paths['Github']).git_dir
-                print('Already a repo')
+                print('Project is already a github repository')
                 return True
             except git.exc.InvalidGitRepositoryError:
                 print('Not a repo')

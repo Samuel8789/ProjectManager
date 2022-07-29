@@ -11,12 +11,9 @@ import sys
 
 from github import Github
 from .ProjectsCLass import Project
-
+from pprint import pprint
 import os
 import glob
-
-
-
 
 class ProjectManager(Project):    
     def __init__(self, githubtoken_path, computer, platform):
@@ -47,22 +44,61 @@ class ProjectManager(Project):
 
     
     def initialize_a_project(self, project, gui) :
+        
+        sys.path.insert(0,  self.all_projects_in_disk[project])
+        sys.path.insert(0, self.all_projects_in_disk['ProjectManager'])
+
         if project=='LabNY':
-            sys.path.insert(0,  self.all_projects_in_disk['LabNY'])
-            # # sys.path.insert(0, os.path.join(self.all_projects_in_disk['LabNY'],' ny_lab'))
-            sys.path.insert(0, self.all_projects_in_disk['ProjectManager'])
             import ny_lab
             self.lab=ny_lab.RunNYLab( self.githubtoken_path, gui)
             return self.lab
         elif project=='AllenBrainObservatory':
-            sys.path.insert(0,  self.all_projects_in_disk['AllenBrainObservatory'])
-            # # sys.path.insert(0, os.path.join(self.all_projects_in_disk['LabNY'],' ny_lab'))
-            sys.path.insert(0, self.all_projects_in_disk['ProjectManager'])
             import allen
             self.allen_ob=allen.AllenBrainObservatory(self.githubtoken_path)
             return self.allen_ob
                    
+    def check_project_git_status(self, project_object):
+        repo=project_object.repo_object
+        
+        repo.is_dirty()  # check the dirty state
+        repo.untracked_files  
+        
+        COMMITS_TO_PRINT = 5
 
+        def print_repository_info(repo):
+             print('Repository description: {}'.format(repo.description))
+             print('Repository active branch is {}'.format(repo.active_branch))
+         
+             for remote in repo.remotes:
+                 print('Remote named "{}" with URL "{}"'.format(remote, remote.url))
+         
+             print('Last commit for repository is {}.'.format(str(repo.head.commit.hexsha)))
+                 
+        
+        def print_commit_data(commit):
+            print('-----')
+            print(str(commit.hexsha))
+            print("\"{}\" by {} ({})".format(commit.summary, commit.author.name, commit.author.email))
+            print(str(commit.authored_datetime))
+            print(str("count: {} and size: {}".format(commit.count(), commit.size)))
+            
+        # check that the repository loaded correctly
+        if not repo.bare:
+            print('Repo at {} successfully loaded.'.format(repo.working_tree_dir))
+            print_repository_info(repo)
+        
+            # create list of commits then print some of them to stdout
+            commits = list(repo.iter_commits('master'))[:COMMITS_TO_PRINT]
+            for commit in commits:
+                print_commit_data(commit)
+                pass
+        
+        else:
+            print('Could not load repository at {} :'.format(repo.working_tree_dir))
+    
+    
+        git = repo.git
+        pprint(git.status())
 
 
 
