@@ -110,6 +110,10 @@ class ProjectManager(Project):
     def pull_from_github(self, project_object):
         git = project_object.repo_object.git
         pprint(git.status())
+        git.fetch()
+        git.log('HEAD..origin/master')
+        git.log('-p','HEAD..origin/master')
+        git.diff('HEAD...origin/master')
         git.pull('origin' ,'master')
         pprint(git.status())
 
