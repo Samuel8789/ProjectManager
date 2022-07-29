@@ -95,9 +95,16 @@ class ProjectManager(Project):
         
         else:
             print('Could not load repository at {} :'.format(repo.working_tree_dir))
+            
+        git = project_object.repo_object.git
+        pprint(git.status())
     
-    
-        git = repo.git
+    def stage_commit_and_push(self, project_object):
+        git = project_object.repo_object.git
+        pprint(git.status())
+        git.add('--all')
+        git.commit ('-m' ,"general auto commit")
+        git.push('origin' ,'master')
         pprint(git.status())
 
 
