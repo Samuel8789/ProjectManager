@@ -190,12 +190,12 @@ lab, allen, MouseDat, datamanaging,session_name, mousename, mouse_object, allacq
 
 
 #%%  github to do
-projectManager.check_project_git_status(projectManager)
-projectManager.stage_commit_and_push(projectManager)
+# projectManager.check_project_git_status(projectManager)
+# projectManager.stage_commit_and_push(projectManager)
 # projectManager.pull_from_github(projectManager)
 
-projectManager.check_project_git_status(lab)
-projectManager.stage_commit_and_push(lab)
+# projectManager.check_project_git_status(lab)
+# projectManager.stage_commit_and_push(lab)
 # projectManager.pull_from_github(projectManager)
 
 
