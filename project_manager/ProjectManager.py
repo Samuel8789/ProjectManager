@@ -106,6 +106,13 @@ class ProjectManager(Project):
         git.commit ('-m' ,"general auto commit")
         git.push('origin' ,'master')
         pprint(git.status())
+        
+    def pull_from_github(self, project_object):
+        git = project_object.repo_object.git
+        pprint(git.status())
+        git.pull('origin' ,'master')
+        pprint(git.status())
+
 
 
 

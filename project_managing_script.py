@@ -192,4 +192,6 @@ lab, allen, MouseDat, datamanaging,session_name, mousename, mouse_object, allacq
 #%%  github to do
 projectManager.check_project_git_status(projectManager)
 projectManager.stage_commit_and_push(projectManager)
+projectManager.pull_from_github(projectManager)
+
 
