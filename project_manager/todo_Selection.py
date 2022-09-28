@@ -16,6 +16,12 @@ import urllib3
 # from pyforest import *
 import os
 import pandas as pd
+import copy
+from scipy import interpolate
+from scipy.spatial.distance import squareform, pdist
+from scipy.stats import kendalltau, pearsonr, spearmanr, ttest_ind, zscore
+
+
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
@@ -26,10 +32,7 @@ from pprint import pprint
 import scipy as spy
 import scipy.io as sio
 
-from scipy.spatial.distance import squareform, pdist
-from scipy.stats import kendalltau, pearsonr, spearmanr, ttest_ind, zscore
-import copy
-from scipy import interpolate
+
 import seaborn as sns
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
@@ -40,7 +43,8 @@ from matplotlib.lines import Line2D
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import animation 
 from IPython.display import HTML
-
+from scipy.stats import mode
+from scipy.stats import norm
 
 
 mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=["k", "r", "b",'g','y','c','m', 'tab:brown']) 
@@ -64,13 +68,14 @@ class TODO_Selection(tk.Tk):
         'plan_mouse_surgeries',
         #AllenBO 6:7
         'work_with_allenBO',
-        #Data processing 7:12
+        #Data processing 7:13
         'testing_datamanagin',
         'testing_image_processing',
         'testing_image_analysis',
         'deep_caiman',
         'dataset_focus',
-        #Analysis 12:
+        'voltage_vis_stim_analysis'
+        #Analysis 13:
         'do_data_analysis_from_non_database',
         'do_data_analysis_from_database',
         'explore_analysis',
@@ -171,7 +176,7 @@ class TODO_Selection(tk.Tk):
             
             
 #%% data processing
-        elif [todo for todo in self.selected_things_to_do if todo in self.things_to_do[7:12]] : 
+        elif [todo for todo in self.selected_things_to_do if todo in self.things_to_do[7:13]] : 
 
             lab=self.projectManager.initialize_a_project('LabNY', self.gui)   
             MouseDat=lab.database
@@ -186,18 +191,32 @@ class TODO_Selection(tk.Tk):
                 self.destroy()
                 return
 
-
-                
                 # this was done for the disk change i think
                 # datamanaging.update_pre_process_slow_data_structure(update=True)
                 datamanaging.update_all_imaging_data_paths()
-                datamanaging. read_all_data_path_structures()
+                datamanaging.read_all_data_path_structures()
                 # datamanaging.delete_pre_procesed_strucutre_mouse_without_data()
                 # datamanaging.read_all_imaging_sessions_from_directories()
                 
                 datamanaging.read_all_immaging_session_not_in_database()
                 
+            elif 'voltage_vis_stim_analysis' in self.selected_things_to_do:
+                self.destroy()
+                return
+            
+                mousenames=['SPKG']
+                mousename=mousenames[0]
+    
+                mouse_object=datamanaging.all_experimetal_mice_objects[mousename]
+                allacqs=mouse_object.all_mouse_acquisitions
+    
+                pprint(list(allacqs.keys()))
+                # selectedaqposition = int(input('Choose Aq position.\n'))
+                selectedaqposition=6
                 
+                #% getting acq
+                acq=allacqs[list(allacqs.keys())[selectedaqposition]]
+                acq.get_all_database_info()
                
 #%% deep caiman  
             elif 'deep_caiman' in self.selected_things_to_do:
@@ -212,6 +231,10 @@ class TODO_Selection(tk.Tk):
                 
                 # tododeepcaiman=['SPHV', 'SPHW','SPHX','SPJB','SPJD','SPKF','SPKH','SPKI','SPKL','SPIG','SPIH']
                 tododeepcaiman=['SPGT', 'SPHQ','SPIB','SPIC','SPIL','SPIM','SPIN','SPJF','SPJG','SPJH','SPJI','SPJZ','SPKC','SPKS',	'SPKU'	,'SPKV'	,'SPLE',	'SPLF']
+                tododeepcaiman=['SPIL','SPJF']
+                tododeepcaiman=['SPOU']
+
+#%%
                 for i in tododeepcaiman:
                     datamanaging.do_deep_caiman_of_mice_datasets([i])
 #%% dataset focus
@@ -219,15 +242,15 @@ class TODO_Selection(tk.Tk):
                 self.destroy()
                 return
                 
-                mousenames=['SPKG']
-                mousename=mousenames[0]
+                mousenames=['SPKG', 'SPOL']
+                mousename=mousenames[1]
 
                 mouse_object=datamanaging.all_experimetal_mice_objects[mousename]
                 allacqs=mouse_object.all_mouse_acquisitions
 
                 pprint(list(allacqs.keys()))
                 # selectedaqposition = int(input('Choose Aq position.\n'))
-                selectedaqposition=5
+                selectedaqposition=6
                 
                 #% getting acq
                 acq=allacqs[list(allacqs.keys())[selectedaqposition]]
@@ -243,11 +266,14 @@ class TODO_Selection(tk.Tk):
                 dtset=alldtsets[list(alldtsets.keys())[selecteddtsetposition]]
                 dtset.most_updated_caiman.load_cnmf_object()
                 cnm=dtset.most_updated_caiman.cnm_object
+                mostupdatedcaimanextraccion=dtset.most_updated_caiman
+                mostupdatedcaimanextraccion.load_results_object()
+                mostupdatedcaimanextraccion.CaimanResults_object.open_caiman_sorter()
                 mov=cnm.estimates.A[:,:].toarray()@(cnm.estimates.C+cnm.estimates.YrA)+cnm.estimates.b@cnm.estimates.f
                 movob=cm.movie(mov.T.reshape((64415,256,256)))
                
                 
-                new_param_dict={'nb':3}
+                new_param_dict={'nb':2}
                 dtset.do_deep_caiman(new_param_dict)
                 dtset.galois_caiman(new_param_dict)
                 
@@ -286,7 +312,8 @@ class TODO_Selection(tk.Tk):
             datamanaging=lab.datamanaging
             
             self.to_return=[lab, [],MouseDat,datamanaging,[],[], [],[],[],[], [],[]]
-                    
+            
+    
 #%%loading session nt yet in dab
             if 'do_data_analysis_from_non_database' in self.selected_things_to_do:
                 session_name='20220330'
@@ -490,13 +517,18 @@ class TODO_Selection(tk.Tk):
                 
                 # get datasets
                 acq.get_all_database_info()
-                acq.load_results_analysis(new_full_data=True) 
                 # acq.load_results_analysis(new_full_data=True) 
+                acq.load_results_analysis(new_full_data=False) 
                 analysis=acq.analysis_object
                 full_data=analysis.full_data
             
                 print(acq.aquisition_name)
+                
                 self.to_return[5:]=[ mousename,  mouse_object , allacqs, selectedaqposition, acq, analysis,full_data]
+                #%% copy to dropbox
+                datamanaging.copy_data_dir_to_dropbox('SPKG')
+
+                
 #%% analysis exploration 
 
                 if 'explore_analysis'  in self.selected_things_to_do:
@@ -552,7 +584,8 @@ class TODO_Selection(tk.Tk):
                     selected_plane_pyhton_sorter_cell_ids=full_imaging_data[plane]['CellIds']
                     #%% SLICING AND INDEXING CELLS STIMULI PLANES AND TRACES EXAMPLES
                    
-                    
+                    full_raster_pyhton_cell_idx=252
+
                     #get info of a cell indexed from a python raster
                     if full_raster_pyhton_cell_idx:
                         selected_plane, total_cells,\
@@ -567,7 +600,7 @@ class TODO_Selection(tk.Tk):
                     #         =analysis.convert_full_planes_idx_to_single_plane_final_indx\
                     #             (analysis.get_full_raster_indx_from_matlab_sorter_idx(matlab_sorter_idx, matlab_sorter_plane),'All_planes_rough')
                     #             #%
-                                
+                    full_raster_pyhton_cell_idx_list 
                     if full_raster_pyhton_cell_idx_list:
                         all_index_info=[ analysis.convert_full_planes_idx_to_single_plane_final_indx(full_raster_pyhton_cell_idx,plane)  for full_raster_pyhton_cell_idx in full_raster_pyhton_cell_idx_list]
                         
@@ -747,27 +780,39 @@ class TODO_Selection(tk.Tk):
 
 
                     #results by trace type
-                    mcmcresults=[i for i in  analysis.jesus_results_list if (('mcmc' in i) and ('.pkl' in i))]
+                    mcmcresults=[i for i in  analysis.jesus_results_list if (('mcmc_scored' in i) and ('.pkl' in i))]
                     dfdtresults=[i for i in  analysis.jesus_results_list if (('dfdt' in i) and ('.pkl' in i))]
                     scoredmcmcresults=[i for i in  analysis.jesus_results_list if (('mcmc_scored' in i) and ('.pkl' in i))]
 
 
-     
+                     # gratings
                     pyr_grat=intersection(pyr_results, drift_grat_results)
                     int_grat=intersection(int_results, drift_grat_results)
                     all_cells_grat=intersection(all_cells_results, drift_grat_results)
 
+
+                    all_cells_grat_mcmcscored=intersection(all_cells_grat, scoredmcmcresults)
+                    pyr_grat_mcmcscored=intersection(pyr_grat, scoredmcmcresults)
+                    int_grat_mcmcscored=intersection(int_grat, scoredmcmcresults)
+
+                    
                     
                     #%% LOAdING JESUS RESULTS 
                     # results get loaded to jesus runs to compare betwen runs
                     analysis.unload_all_runs()
-                    analysis.load_jesus_results(mcmcresults[16])
+                    analysis.load_jesus_results(all_cells_grat_mcmcscored[0])
+                    analysis.load_jesus_results(pyr_grat_mcmcscored[0])
+                    analysis.load_jesus_results(int_grat_mcmcscored[0])
+
                     # analysis.load_jesus_results(pyr_grat[0])
                     # analysis.load_jesus_results(int_grat[0])
                     # analysis.load_jesus_results(all_cells_grat[0])
+                    
+                    #
+                    
                     #%% ANALYSIS SINGLE RESULT RUN
                     analysis.unload_all_runs()
-                    analysis.load_jesus_results(scoredmcmcresults[-1])
+                    analysis.load_jesus_results(scoredmcmcresults[0])
                     analysis.jesus_runs
                     jesusres_object=analysis.jesus_runs[list(analysis.jesus_runs.keys())[0]]
                     jesusres_object.load_analysis_from_file()
@@ -790,7 +835,7 @@ class TODO_Selection(tk.Tk):
          
             #%% COMPARE CELL TYPE RUNS  LOAD RUNS
                     plt.close('all')
-                    plot=1
+                    plot=0
                     analysis.jesus_runs
 
 
@@ -842,12 +887,114 @@ class TODO_Selection(tk.Tk):
                     # an=cell_subtype_runs[list(cell_subtype_runs.keys())[0]][0].analysis
                     # cell_subtype_runs[list(cell_subtype_runs.keys())[0]][0].analysis['Ensembles']['EnsembleNeurons']
                     
+                    
+#%% PLOT SOMETHING ABOT THE SNEMBLE STRUCTIRE AND TUNING PROPERTIES
+    #plot ensmebles cell rois
+    # find where each ensembles is activ
+    # find which stimulu is associated with a given ensmeble
+    # try to decode stimulus based on sensemble
+                    import itertools
+
+                    aallplanescellids=list(itertools.chain.from_iterable([ list(map( lambda x:(list((x,plane)))  ,full_data['imaging_data']['All_planes_rough']['CellIds'][plane] )) 
+                                                                          for plane in full_data['imaging_data']['All_planes_rough']['CellIds']]))
+                    
+                    
+                    
+                    
+                    # planes=['Plane1', 'Plane2', 'Plane3']
+                    # full_data['imaging_data'][plane]['CellIds']
+                    
+                    
+                    
+                    combined=cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_All_jesus' in i][0]]
+                    pyramidals= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Pyramidal_' in i][0]]
+                    interneurons= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Interneurons_' in i][0]]
+                    #%%
+                    from scipy.ndimage import gaussian_filter
+                    plt.close('all')
+                    
+                    methods=['combined', 'pyramidals', 'interneurons']
+
+                    
+                    allensembles=[combined, pyramidals, interneurons]
+                    cell_types=['Pyramidals','Interneurons']
+                    planes=['Plane1','Plane2','Plane3']
+                    for m, meth in enumerate(allensembles):
+                        for key, ensemble in meth[1].items():
+                            allcells=[[ sorted([aallplanescellids[i][0] for i in ensemble[cell_type]  if aallplanescellids[i][1]==plane]) for plane in planes] for cell_type in cell_types]
+                            allceltypesmask=[]
+                            for cell_type in allcells:
+                                
+                                allplanesmasks=[]
+                                for plane in cell_type:
+                
+                                    allmask=np.zeros(dims)
+                                    for i in plane:
+                                        allmask=allmask+ np.reshape(res.data['est']['A'][:,i-1].toarray(), dims, order='F')
+                                        
+                                    allmask[allmask<70]=0
+                                    allmask[allmask>70]=255
+                                    allmask=gaussian_filter(allmask,0.5)
+                                    allmask[allmask>0]=255
+                                    allplanesmasks.append(allmask)
+                                    
+                                allceltypesmask.append(allplanesmasks)
+           
+                                                
+                            # fig    = plt.figure()
+                            # ax     = fig.gca(projection='3d')
+                            
+                            x      = np.arange(allplanesmasks[0].shape[0])
+                            X, Y   = np.meshgrid(x, x)
+                            # levels=[254,255]
+                            # for i, mask in enumerate(allceltypesmask[0]):
+                                
+                            #     ax.contourf(X, Y, mask, levels,
+                            #             colors=('k'),
+                            #             zdir='z', offset=1.5*i, alpha=1)
+                                
+                            #     ax.contourf(X, Y, allceltypesmask[1][i], levels,
+                            #             colors=('r'),
+                            #             zdir='z', offset=1.5*i, alpha=1)
+                               
+                            
+                            # ax.set_zlim3d(0, 3.5)
+                            # plt.grid(False)                                       
+                            # ax.view_init(elev=25., azim=30)
+
+                            f,ax=plt.subplots(1,3, figsize=(20,9))
+           
+                            levels=[254,255]
+                            for i, mask in enumerate(allceltypesmask[0]):
+                                ax[i].contourf(X, Y, mask, levels,
+                                           colors=('k'),
+                                            )
+                                
+                                ax[i].contourf(X, Y, allceltypesmask[1][i], levels,
+                                        colors=('r'),
+                                          )
+                                ax[i].axis('square')
+                            plt.tight_layout()
+                            f.suptitle(f'{key.replace(": ", "_")} Composition')
+
+                            # plt.show()
+                            
+                            
+                                
+                            filename = os.path.join(os.path.split(combined[0].analysis_path)[0],f'{"_".join(combined[0].input_options)}_{combined[0].timestr}_{methods[m]}_{key.replace(": ", "_")}_ensemble_components.pdf')
+                            run_object.save_multi_image(filename)
+
+                                                            
                     #%% COMPARE ENSMEBLE SIMILARITES
                     plt.close('all')
 
                     combinedraster=cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_All_jesus' in i][0]][2].astype('float')
                     pyramidalraster= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Pyramidal_' in i][0]][2].astype('float')
                     interneuronraster= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Interneurons_' in i][0]][2].astype('float')
+                    
+                    combined=cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_All_jesus' in i][0]]
+                    pyramidals= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Pyramidal_' in i][0]]
+                    interneurons= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Interneurons_' in i][0]]
                         
                     adjacency_pyr=np.zeros((combinedraster.shape[0],pyramidalraster.shape[0] ))
                     adjacency_inter=np.zeros((combinedraster.shape[0],interneuronraster.shape[0] ))
@@ -890,15 +1037,39 @@ class TODO_Selection(tk.Tk):
                     ax[0].set_xlabel('Pyramidal Ensembles')
                     ax[1].set_xlabel('Interneuron Ensembles')
                     plt.tight_layout()
+                    
+                    
+                    fig,ax=plt.subplots(1,1, figsize=(20,9))
+                    pyr_ad=ax.imshow(adjacency_pyr, cmap='jet', aspect='auto')
+                    fig.colorbar(pyr_ad, ax=ax, location='right', anchor=(0, 0.3), shrink=0.7)
+                    fig.suptitle('Ensemble Cosine Similarity')
+                    ax.set_ylabel('Combined Ensembles')
+                    ax.set_xlabel('Pyramidal Ensembles')
+                    plt.tight_layout()
 
-                    filename = os.path.join(os.path.split(run_object.analysis_path)[0],f'{"_".join(run_object.input_options)}_{run_object.timestr}_ensmble_similarity.pdf')
+
+
+                    filename = os.path.join(os.path.split(combined[0].analysis_path)[0],f'{"_".join(combined[0].input_options)}_{combined[0].timestr}_pyr_ensemble_similarity.pdf')
                     run_object.save_multi_image(filename)
 
                     plt.close('all')
+                    
+                    
+                    
+                    
+                    # most similar ensembles
+                    pyramid_most_similars=[]    
+                    for i,combined_ensemble in enumerate(adjacency_pyr):
+                        pyramid_most_similars.append([i+1, combined_ensemble.argmax()+1,combined_ensemble.max()])
+                        
+                    pyr_equivalents=[i for i in pyramid_most_similars if i[2]>0.1]   
+                           
+                    inter_most_similars=[]    
+                    for combined_ensemble in adjacency_inter:
+                        inter_most_similars.append([combined_ensemble.argmax()+1,combined_ensemble.max()])
+                                
 
-                    combined=cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_All_jesus' in i][0]]
-                    pyramidals= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Pyramidal_' in i][0]]
-                    interneurons= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Interneurons_' in i][0]]
+                 
 
                     
                     similarities={}
@@ -944,6 +1115,10 @@ class TODO_Selection(tk.Tk):
 
 
                            similarities[name]['Interneurons'][name3]=[x,simil, sizes2]
+                           
+                     # MOST SIMILAR ENSEMBLES
+                  
+                           
 
 
 
@@ -992,11 +1167,16 @@ class TODO_Selection(tk.Tk):
                         fig.suptitle(test_ensem_l[0])
                         plt.tight_layout()
                         
-                    filename = os.path.join(os.path.split(run_object.analysis_path)[0],f'{"_".join(run_object.input_options)}_{run_object.timestr}_ensemble_by_ensemble.pdf')
-                    run_object.save_multi_image(filename)
+                    filename = os.path.join(os.path.split(combined[0].analysis_path)[0],f'{"_".join(combined[0].input_options)}_{combined[0].timestr}_ensemble_by_ensemble.pdf')
+                    combined[0].save_multi_image(filename)
 
                     plt.close('all')
                     
+                    
+                     
+                        
+
+
 
  #%% COMPARISON OF ESNEMBLE BETWEN THRE CELL YPES RUNS
 
@@ -1135,13 +1315,16 @@ class TODO_Selection(tk.Tk):
             
                         ax.axvspan(xmin=j , xmax=j+33, color='red', alpha=0.2)
 
+
+                    
+
                     
                     #%%
                     
                     ensemble=list(similarities.keys())[1]   
                     cells=copy.copy(combined[1][ensemble]['Pyramidals'])
                     cells.extend(combined[1][ensemble]['Interneurons'])
-                    analysis.plot_orientation(352,trace_type,plane)
+                    analysis.plot_orientation(391,trace_type,plane,plot=True)
 
                     # for cell in cells:
                     #     #%%
@@ -1152,7 +1335,6 @@ class TODO_Selection(tk.Tk):
                     
                     
                     all_mena_act=[]
-                    ensmeble
                     cells=copy.copy(pyramidals[1][ensmeble]['Pyramidals'])
                     meanacti=[]
                     for cell in cells:
@@ -1232,7 +1414,6 @@ class TODO_Selection(tk.Tk):
     
                         meanoriactensemble=np.zeros((4,1))
                         test=list(zip(*meanacti))
-                        meani=[]
                         for j,i in enumerate(test):
                             meanoriactensemble[j]=(np.mean(i))
                         all_mena_act.append(meanoriactensemble)
@@ -1302,8 +1483,18 @@ class TODO_Selection(tk.Tk):
                     allen_mock.response=allen_mock.get_response()
                     response=allen_mock.response
                     
+                    a=allen_mock.mean_sweep_response
+                    aa=allen_mock.sweep_response
+                    aaa=response
+                    
+                 
+                   
+                    
+                    
+                    #%%
                     allen_mock.peak=allen_mock.get_peak()
                     peak=allen_mock.peak
+                    
                     
                     activity_arrays= analysis.get_raster_with_selections(trace_type,plane,selected_cells, paradigm, drifting_options)
                     tom=pd.DataFrame([cell[1] for cell in activity_arrays[4][3]])
@@ -1322,10 +1513,15 @@ class TODO_Selection(tk.Tk):
 
 
                     #%% SINGLE CELL ORIENTATIO PLOTTING
-                    cell=22
-                    allen_mock.open_star_plot(include_labels=True,cell_index=cell)
-                    s2,_=analysis.plot_orientation(cell,trace_type,plane)
-                    # analysis.plot_blank_sweeps(cell, trace_type, plane)
+                    cell=391
+                    included=combined[1]['Ensemble: 5']['Pyramidals']
+                    excludedcells=set(pyramidals[1]['Ensemble: 5']['Pyramidals'])^ set(combined[1]['Ensemble: 4']['Pyramidals'])
+                    cells=included
+                    
+                    for cell in cells:
+                        allen_mock.open_star_plot(include_labels=True,cell_index=cell,show=True)
+                        s2,_=analysis.plot_orientation(cell,trace_type,plane,plot=True)
+                        # analysis.plot_blank_sweeps(cell, trace_type, plane)
                     #%% FINDE UNIQUE ENSMEBLE CELLS AND PROMISCOUS
                     import itertools
 
@@ -1361,87 +1557,356 @@ class TODO_Selection(tk.Tk):
                         
                     
                     #%% ALL ESNEMBLE CELLS ORIENTATION PLOTTING WITH JESUS ENSEMBLES
+ 
                     
                     combined=cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_All_jesus' in i][0]]
                     pyramidals= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Pyramidal_' in i][0]]
                     interneurons= cell_subtype_runs[[ i for i in cell_subtype_runs.keys() if '_Interneurons_' in i][0]]
 
                     
-                    selectedtun=pyramidals
-                    
-                    plt.close('all')
-                    for idx in range(len(selectedtun[1].keys())):
-                        print(selectedtun[1][list(selectedtun[1].keys())[idx]])
-                        
+                    runs_names=['Combined','Pyramidal','Interneurons']
+                    runs=[combined,pyramidals,interneurons]
                     celltypes=['Pyramidals', 'Interneurons']
-                    clltypeidx=0
-                    esnembleidx=1
-                    '''
-                    pyramidal ensembles dfdt smpoothed 
-                    esnembel0 315 orientation
-                    esnembel1 135 centered
-                    esnembel2 90 orienation
-                    esnembel3 315 orientation
-                    esnembel4 45 orientation 225
-                    esnembel5 Mixed
-
-                    '''
-                    '''
-                    combined ensemble interneuronss scoredmccmbinary
-                    esnembel0 mixed inter
-                    esnembel1 90 angle like ensemble1 pyramidal plus one tuned interneruosn
-                    esnembel2 mixed inter
-                    esnembel3 stim selecetive only inter
-                    esnembel4 tuned to 0 mistly mixed
-                    esnembel5 mixed mostly
-                    esnembel6 mixed mostly
-                    esnembel7 mixed mostly and tuned 
-                    esnembel8    mixed                 
-
-                    '''
-                    '''
-                    combined ensemble pyrs scoredmccmbinary
-                    esnembel0 135 and mixed
-                    esnembel1 90 and mixed
-                    esnembel2 
-                    esnembel3 
-                    esnembel4 
-                    esnembel5 
-                    esnembel6 
-                    esnembel7
-                    esnembel8                     
-
-                    '''
-                    '''
-                    pyramida ensembles scoredmccmbinary
-                    esnembel0 45 with some 0 and some of opossie direcion
-                    esnembel1 90 with some 135
-                    esnembel2 270 with some 90
-                    esnembel3 225 
-                    esnembel4 315 with 0
-                    all in general have mixed form adjacent angles
-
-                    '''
-                    '''
-                    interneurons ensembles scoredmccmbinary
-                    esnembel0  stimulus responsive higher temporal freqs
-                    esnembel1  stim reposnsibv , some tuned cells and lower temp freq
-                    esnembel2  stim responsive mixed
-                    esnembel3 stim responsibve lower frequencies, and some tuned
-                    esnembel4 
-
-                    '''
+                    orientation=1
+                    direction=1
+                    plot_cells=0
+                    directions=np.linspace(0,360-45,8).astype('uint16')
+                    angles=directions[:4]
                     
-
-                    cells= selectedtun[1][list(selectedtun[1].keys())[esnembleidx]][celltypes[clltypeidx]]
-                    # locomotioninterneurons=peak.iloc[cells]
                     
-                    for cell in selectedtun[1][list(selectedtun[1].keys())[esnembleidx]][celltypes[clltypeidx]]:
-                        allen_mock.open_star_plot(include_labels=True,cell_index=cell)
-                        s2,_=analysis.plot_orientation(cell,trace_type,plane)
+                    meth_orientations=[]
+                    for i, run in enumerate(runs):
+                        
+                        plt.close('all')
+                        for ensemble in range(len(run[1].keys())):
+                            print(run[1][list(run[1].keys())[ensemble]])
+                            
+                            
+                        celltypes_orientations=[]
+                        for cell_type in celltypes:
+       
+                            ensemble_orientations=[]                         
+                            for ensemb in list(run[1].keys()):
+                                if run[1][ensemb][cell_type]:
+
+                                    cells= sorted(run[1][ensemb][cell_type])
+                                    if plot_cells:
+                                        for cell in cells:
+                                            allen_mock.open_star_plot(include_labels=True,cell_index=cell, show=None)
+                                        
+                                    ensemble_orientation=peak.iloc[cells]['ori_dg'].values
+                                    ensemble_orientations.append(ensemble_orientation)
+                        
+                            celltypes_orientations.append(ensemble_orientations)
+                                        
+                        meth_orientations.append(celltypes_orientations)
                         
                         
+                    meth_orientations[0].append([np.hstack([ensmeble, meth_orientations[0][1][i]]) for i , ensmeble in enumerate(meth_orientations[0][0])])
+                    
+                    for i, run in enumerate(meth_orientations):
+                
+                        for j, cell_type in enumerate(run):
+                            if j<2:
+                                newcelltypes=celltypes[j]
+                                
+                            else:
+                                newcelltypes='Pyr + Int'
+
+                            for k, ensemb in enumerate(cell_type):
+                               
+                                    # cells= ensemb
+                                    # if plot_cells:
+                                    #     for cell in cells:
+                                    #         allen_mock.open_star_plot(include_labels=True,cell_index=cell, show=None)
+                                        
+                                if orientation:
+            
+                                    f,ax=plt.subplots(1, figsize=(20,9))
+                
+                                    mu, std = norm.fit ([i-4 if i>3 else i for i in ensemb])
+                                    ax.hist([i-4 if i>3 else i for i in ensemb ], bins=range(5),density=True, alpha=0.6, align='left')
+                                    ax.set_xticks(ticks=range(4))
+                                    ax.set_xticklabels(labels=angles)
+
+                                    xmin, xmax = ax.get_xlim()
+                                    x = np.linspace(xmin, xmax, 100)
+                                    p = norm.pdf(x, mu, std)
+                                    ax.plot(x, p, 'k', linewidth=2)
+                                    ax.set_ylim(0,1.2)
+                                    f.suptitle(runs_names[i] +' '+ list(runs[i][1].keys())[j] +' ' + newcelltypes)
+              
+                                    
+                                    
+                                if direction:
+                                    f,ax=plt.subplots(1, figsize=(20,9))
+   
+                                    mu, std = norm.fit(ensemb.tolist())
+                                    ax.hist( ensemb , bins=range(9),density=True, alpha=0.6, align='left')
+                                    ax.set_xticks(ticks=range(8))
+                                    ax.set_xticklabels(labels=directions)
+                                    xmin, xmax = ax.get_xlim()
+                                    x = np.linspace(xmin, xmax, 100)
+                                    p = norm.pdf(x, mu, std)
+                                    ax.plot(x, p, 'k', linewidth=2)
+                                    ax.set_ylim(0,1.2)
+                                    f.suptitle(runs_names[i] +' '+ list(runs[i][1].keys())[j] +' ' + newcelltypes)
+
+                                    # plt.hist(peak.iloc[cells]['reliability_dg'])
+                                    # plt.show()
+                                    # plt.hist(peak.iloc[cells]['osi_dg'])
+                                    # plt.show()
+            
+                                    # plt.hist(peak.iloc[cells]['dsi_dg'])
+                                    # plt.show()
+            
+                                    # plt.hist(peak.iloc[cells]['peak_dff_dg'])
+                                    # plt.show()
+            
+                                    # plt.hist(peak.iloc[cells]['ptest_dg'])
+                                    # plt.show()
+            
+                                    # plt.hist(peak.iloc[cells]['cv_os_dg'])
+                                    # plt.show()
+            
+                                    # plt.hist(peak.iloc[cells]['cv_ds_dg'])
+                            
+                                filename = os.path.join(os.path.split(combined[0].analysis_path)[0],f'{"_".join(combined[0].input_options)}_{combined[0].timestr}_{runs_names[i]}_{list(runs[i][1].keys())[k].replace(": ", "_")}_{newcelltypes}_ensemble_grating_selectivities.pdf')
+                                run_object.save_multi_image(filename)
+                                                        
+                    #%% other parameter exploraTION GLOABL  
+                    plt.hist(peak['ptest_dg'].values)
+                    plt.show()
+
+                    plt.hist(100*peak['peak_dff_dg'].values)
+                    plt.show()
+                    
+                    plt.hist(100*peak['reliability_dg'].values) # PREFERED CONDIION RELIABILITY
+                    plt.show()
+
+                    nonsignifantcells=peak[peak['ptest_dg'].values>0.05]
+                    significantcells=peak[peak['ptest_dg'].values<0.05]
+                    percentage_stim_responsive_cells=100*significantcells.shape[0]/peak.shape[0]
+                    
+                    
+                    runs=[combined,pyramidals,interneurons]
+                    runs_names=['Combined','Pyramidal','Interneurons']
+                    celltypes=['Pyramidals', 'Interneurons']
+
+                    
+                    
+                    #%% other parameter LOOP ALL ENSMEBLES
+                    
+                    runs=[combined,pyramidals,interneurons]
+                    runs_names=['Combined','Pyramidal','Interneurons']
+                    celltypes=['Pyramidals', 'Interneurons']
+
+                    run_idx=0
+                    run=runs[run_idx][1]
+                    ensesmblemnumbers=list(range(10))
+                    ens_idx=1
+                    ensemble=f'Ensemble: {ensesmblemnumbers[ens_idx]}'
+                                      
+                    print( trace_types)
+                    print(planes)
+                    print(paradigms)
+                    print(selected_cells_options)
+                    trace_type=trace_types[-1]
+                    
+                    all_freq_means=[]
+                    for i, r in enumerate(runs):
+                        frequencies_means=[]
+
+                        ensemble_struc=r[1]
+                        for ensemble_idx in range(1,len(r[1])+1):
+                            ensemble=f'Ensemble: {ensesmblemnumbers[ensemble_idx]}'
+                            for cell_type in celltypes:
+                                if ensemble_struc[ensemble][cell_type]:
+                                    cells=ensemble_struc[ensemble][cell_type]
+                                    print('_'.join([runs_names[i],ensemble,cell_type]))
+                                    print(peak.iloc[cells]['ptest_dg'].values<0.05)
+                                    print(100*sum(peak.iloc[cells]['ptest_dg'].values<0.05)/len(peak.iloc[cells]['ptest_dg'].values<0.05))
+                                    
+                                    # plt.hist(peak.iloc[cells]['ptest_dg'].values)
+                                    # plt.show()
+                                    # plt.hist(100*peak.iloc[cells]['peak_dff_dg'].values)
+                                    # plt.show()
+
+                # calculate mean cell reliability per ensemble
+                                    labels=['reliability_dg','osi_dg','cv_os_dg','dsi_dg','cv_ds_dg','tf_index_dg']
+                                    params_to_print=[np.mean(peak.iloc[cells]['reliability_dg']),
+                                    
+                                                        np.mean(peak.iloc[cells]['osi_dg']),
+                                                        np.mean(peak.iloc[cells]['cv_os_dg']),
+                    
+                                                        np.mean(peak.iloc[cells]['dsi_dg']),
+                                                        np.mean(peak.iloc[cells]['cv_ds_dg']),
+                                                        
+                                                        np.mean(peak.iloc[cells]['tf_index_dg'])]
+                                    
+                                    frequencies_means.append( np.mean(peak.iloc[cells]['dsi_dg']))
+                                    
+                                    
+                                    for k,j in enumerate(params_to_print):
+                                        print(labels[k])
+                                        print(j)
+                
+                        all_freq_means.append(frequencies_means)
+                        
+                        #%%
+                    x_sharp= np.arange(0, 2*np.pi+2*np.pi/8, 2*np.pi/8)
+                    X_ = np.linspace(np.radians(directions).min(),2*np.pi, 500)
+                    
+                    for i, r in enumerate(runs):
+                       frequencies_means=[]
+
+                       ensemble_struc=r[1]
+                       for ensemble_idx in range(1,len(r[1])+1):
+                           ensemble=f'Ensemble: {ensesmblemnumbers[ensemble_idx]}'
+                           combinedcells=[]
+                           for cell_type in celltypes:
+                               if ensemble_struc[ensemble][cell_type]:
+                                   cells=ensemble_struc[ensemble][cell_type]
+                                   combinedcells=combinedcells+cells
+                                   
+                                   mm=all_angle_mean_reponses[np.array(sorted(cells)),:].mean(axis=0)
+                                   mm_std=all_angle_mean_reponses[np.array(sorted(cells)),:].std(axis=0)
+                                   joined_mm=np.append(mm,mm[0])
+                                   joined_mm_std=np.append(mm_std,mm_std[0])
+
+  
+                                   f,ax=plt.subplots(1, figsize=(20,9), subplot_kw={'projection': 'polar'})
+                                   ax.plot(x_sharp, joined_mm)
+
+                                   ax.errorbar(x_sharp, joined_mm, joined_mm_std, linestyle='None', marker='^')
+
+                                 
+                                   # X_Y_Spline = make_interp_spline(x_sharp, joined_mm)                        
+                                   # Y_ = X_Y_Spline(X_)
+                                   # ax.plot(X_, Y_)
+                                  
+                                   f.suptitle('_'.join([runs_names[i],ensemble,cell_type]))
+                                   ax.set_xticklabels(directions) 
+                                   ax.set_ylim(-0.05,0.25)
+                                   
+                                   filename = os.path.join(os.path.split(combined[0].analysis_path)[0],f'{"_".join(combined[0].input_options)}_{combined[0].timestr}_{runs_names[i]}_{ensemble.replace(": ", "_")}_{cell_type}_polar_ensemble_grating_Dff.pdf')
+                                   run_object.save_multi_image(filename)
+                                   
+                           if i==0 and cell_type=='Interneurons':
+                                     
+                                 mm=all_angle_mean_reponses[np.array(sorted(combinedcells)),:].mean(axis=0)
+                                 mm_std=all_angle_mean_reponses[np.array(sorted(cells)),:].std(axis=0)
+                                 joined_mm=np.append(mm,mm[0])
+                                 joined_mm_std=np.append(mm_std,mm_std[0])
+      
+      
+                                 
+                                 f,ax=plt.subplots(1, figsize=(20,9), subplot_kw={'projection': 'polar'})
+                                 ax.plot(x_sharp, joined_mm)
+                                 ax.errorbar(x_sharp, joined_mm, joined_mm_std, linestyle='None', marker='^')
+      
+      
+                                 
+                                 # X_Y_Spline = make_interp_spline(x_sharp, joined_mm)                        
+                                 # Y_ = X_Y_Spline(X_)
+                                 # ax.plot(X_, Y_)
+      
+                                 
+                                 
+                                 f.suptitle('_'.join([runs_names[i],ensemble,'full_cells']))
+                                 ax.set_xticklabels(directions) 
+                                 ax.set_ylim(-0.05,0.25)
+                            
                    
+                                 filename = os.path.join(os.path.split(combined[0].analysis_path)[0],f'{"_".join(combined[0].input_options)}_{combined[0].timestr}_{runs_names[i]}_{ensemble.replace(": ", "_")}_Pyr + Int_polar_ensemble_grating_Dff.pdf')
+                                 run_object.save_multi_image(filename)
+                                   
+
+
+                    #%% comparing exc equivalent ensembles   
+                    all_comsp=[]
+                    parameters=[col for col in peak.columns]
+
+                    for ensmeble_simils in pyr_equivalents:
+                        ensmeb=runs[0][1][f'Ensemble: {ensmeble_simils[0]}']
+                        onlypyramidalcell=ensmeb['Pyramidals']
+                        full=pyramidalcell+ensmeb['Interneurons']
+                        pyrensemb=runs[1][1][f'Ensemble: {ensmeble_simils[1]}']
+                        pyramidalcells=pyrensemb['Pyramidals']
+                        
+                        
+                        mixed={'pyr_only':pyramidalcells, 'combined_pyr':onlypyramidalcell, 'combined_full':full }
+                        
+                        
+                        equivalent_comparisons={k:{parameter: np.mean(peak.iloc[v][parameter]) for parameter in parameters[:-1]} for k,v in mixed.items()}
+                        all_comsp.append(equivalent_comparisons)   
+                        
+                    plt.bar(equivalent_comparisons.keys(),[v['reliability_dg'] for k,v in equivalent_comparisons.items()])
+                    
+                    width = 0.2 
+                    labels=[f'Combined Ensmeble: {i[0]}' for i in pyr_equivalents]
+                    x = np.arange(1,len(labels)+1)
+                    labels.insert(0,0)
+
+                    for parameter in parameters[:-1]:
+                        
+                        Pyr_Only=[i['pyr_only'][parameter] for i in all_comsp]
+                        Combined_Pyr=[i['combined_pyr'][parameter] for i in all_comsp]
+                        Combined_Full=[i['combined_full'][parameter] for i in all_comsp]
+                        
+                        
+                        fig, ax =plt.subplots(1, figsize=(20,9))
+                        ax.bar(x - 0.2, Pyr_Only,     width,      label='Pyr_Only')
+                        ax.bar(x, Combined_Pyr,  width,  label='Combined_Pyr')
+                        ax.bar(x + 0.2, Combined_Full, width, label='Combined_Full')
+                        ax.set_xticklabels(labels)
+                        ax.legend(["Pyr_Only", "Combined_Pyr", "Combined_Full"])
+                        fig.suptitle(parameter)
+                        
+                    
+                    filename = os.path.join(os.path.split(combined[0].analysis_path)[0],f'{"_".join(combined[0].input_options)}_{combined[0].timestr}_ensemble_grating_parameter_comp.pdf')
+                    run_object.save_multi_image(filename)
+                                            
+                            
+                        
+                  
+                        
+                        
+                     
+                    #%% single cell
+                    run_idx=0
+                    run=runs[run_idx][1]
+                    ensesmblemnumbers=list(range(10))
+                    ens_idx=1
+                    ensemble=f'Ensemble: {ensesmblemnumbers[ens_idx]}'
+                    
+                    pyr_cells=run[ensemble][celltypes[0]]
+                    int_cells=run[ensemble][celltypes[1]]
+                    
+                    cell=pyr_cells[5]
+                    if peak.iloc[cell]['ptest_dg']<0.05:
+                        s2,_=analysis.plot_orientation(cell,trace_type,plane,plot=True)
+                        allen_mock.open_star_plot(include_labels=True,cell_index=cell, show=True)
+                        pprint(peak.iloc[cell])
+                    else:
+                        print('not significantly tuned')
+                        
+
+
+                     
+                    all_angle_mean_reponses=np.zeros([response.shape[2], response.shape[0]])
+                    for i in range(response.shape[0]):
+                    
+                        all_angle_mean_reponses[:,i]=response[i, 1:, :, 0].mean(axis=0)
+                        
+          
+                    
+                    
+                 
+
+                    
+                      
+
                     
                     
                     #%% GENERAL POPULATION PROPERTIES OF TUNING SIGLE CELLS
@@ -1456,7 +1921,8 @@ class TODO_Selection(tk.Tk):
                     for celltype in celltypes:
                         allen_mock.plot_preferred_temporal_frequency(peak_dff_min=0.02, cell_type=celltype)
 
-                
+                    allen_mock.signal_noise_correlations()
+                    
 
                 
                 #%% PCA
@@ -1516,8 +1982,6 @@ class TODO_Selection(tk.Tk):
             
             lab=self.projectManager.initialize_a_project('LabNY', self.gui)   
             MouseDat=lab.database
-            lab.do_datamanaging(full=False)
-            datamanaging=lab.datamanaging
             
             self.to_return=[lab, [],MouseDat,datamanaging,[],[], [],[],[],[], [],[]]
             
@@ -1543,6 +2007,12 @@ class TODO_Selection(tk.Tk):
             # get datasets
             acq.get_all_database_info()
             acq.load_results_analysis(new_full_data=False) 
+            
+            
+            from ny_lab.data_analysis.resultsAnalysis import ResultsAnalysis
+            allen_results_analysis=ResultsAnalysis(allen_BO_tuple=(allen,data_set,spikes ))
+            
+            
             analysis=acq.analysis_object
             full_data=analysis.full_data
         

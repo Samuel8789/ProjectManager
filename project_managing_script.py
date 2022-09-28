@@ -16,7 +16,7 @@
 # conda update conda
 # conda update --all
 # conda config --set channel_priority flexible
-# conda install mamba
+# conda install mamba 
 # mamba create -n caiman2 -c conda-forge caiman
 # mamba install -c conda-forge caiman
 # mamba activate caiman2
@@ -47,7 +47,7 @@
  #  - conda-forge/noarch::ipywidgets==7.7.0=pyhd8ed1ab_0
  #  - conda-forge/win-64::jupyter==1.0.0=py38haa244fe_7
 
-
+#CAIMAN MODEUL PATH C:\Users\sp3660\anaconda3\envs\caiman\Lib\site-packages\caiman\source_extraction\cnmf
 
 
 #         to do configure gitpyhton
@@ -71,7 +71,7 @@
 #pyhton=3.9
 # conda activate remark
 # cd Documents\Github\mendeley...\
-# pyhton sync.py
+0# pyhton sync.py
 
 
 # """
