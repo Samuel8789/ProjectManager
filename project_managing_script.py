@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
-# """
-# Created on Fri Apr  9 09:27:59 2021
+"""
+Created on Wed Apr 13 10:57:50 2022
 
-# @author: sp3660
+@author: sp3660
+"""
+
 # requirements
+# check environemnet and anconda
 # check environemnet and anconda
 # install miniconda
 
 # check gtihub tokeny
+
 # git
 # numpy
 # matplotlib
-
 
 # conda update conda
 # conda update --all
@@ -27,7 +30,7 @@
 # mamba install python=3.8
 # mamba install jinja2=3.0
 # mamba install spyder=5.1
-# pip install allensdk
+# pip install allensdkn
 # setx /M PATH "%PATH%;C:\Users\sp3660\AppData\Roaming\Python\Python38\Scripts"
 # mamba install tifffile==2024.4.8 BAD, very slow lots of siseeus 
 # caiman timeseries chanche compress= fro compression=
@@ -49,17 +52,12 @@
 
 #CAIMAN MODEUL PATH C:\Users\sp3660\anaconda3\envs\caiman\Lib\site-packages\caiman\source_extraction\cnmf
 
-
 #         to do configure gitpyhton
-#     conda install -c conda-forge opencv
+#     conda install -c conda-forge opencvv
 #     conda config --set allow_conda_downgrades true
-#     conda install -n root conda=4.6
+#     conda install -n root conda=4.6gggggqccb
 #     conda config --set auto_update_conda false
 #     conda config --remove channels conda-forge
-    
-
-    
-    
     
 
 # conda config --add channels conda-forge
@@ -71,10 +69,9 @@
 #pyhton=3.9
 # conda activate remark
 # cd Documents\Github\mendeley...\
-0# pyhton sync.py
+# pyhton sync.py
 
 
-# """
 from pathlib import Path
 import tkinter as tk
 from sys import platform
@@ -186,7 +183,7 @@ selection=TODO_Selection(projectManager)
 selection.mainloop()
 
 #%%
-lab, allen, MouseDat, datamanaging,session_name, mousename, mouse_object, allacqs, selectedaqposition, acq, analysis,full_data=selection.to_return
+lab, allen, MouseDat, datamanaging,session_name, mousename, mouse_object, allacqs, selectedaqposition, acq, analysis,full_data, selected_analysis=selection.to_return
 
 
 #%%  github to do
