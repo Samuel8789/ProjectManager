@@ -552,16 +552,16 @@ class TODO_Selection(tk.Tk):
                 self.destroy()
                 return
                 
-                chand_good_datasets=['SPKS','SPRE','SPRB']
+                chand_good_datasets=['SPKS','SPRE','SPRB','SPRN','SPRM','SPRZ']
                 int_good_datasets=['SPKG', 'SPOL','SPQZ']
-                mousename=chand_good_datasets[2]
+                mousename=chand_good_datasets[4]
 
                 mouse_object=datamanaging.all_experimetal_mice_objects[mousename]
                 allacqs=mouse_object.all_mouse_acquisitions
 
                 pprint(list(allacqs.keys()))
                 # selectedaqposition = int(input('Choose Aq position.\n'))
-                selectedaqposition=4
+                selectedaqposition=6
                 
                 #% getting acq
                 acq=allacqs[list(allacqs.keys())[selectedaqposition]]
@@ -582,6 +582,22 @@ class TODO_Selection(tk.Tk):
                 mostupdatedcaimanextraccion.CaimanResults_object.open_caiman_sorter()
                 mov=cnm.estimates.A[:,:].toarray()@(cnm.estimates.C+cnm.estimates.YrA)+cnm.estimates.b@cnm.estimates.f
                 movob=cm.movie(mov.T.reshape((64415,256,256)))
+                #%% OPTIONAL REMOVE OPTO LED FRAMES BEFORE MOTION CORRETCIN AND CIAMAN
+                acq.load_all()
+                volt=acq.voltage_signal_object
+                volt.voltage_signals_dictionary_daq
+                volt.voltage_signals_dictionary
+                dtset.remove_LED_artifacts()
+                dtset.preoptoframes
+                dtset.postoptoframes
+                cm.load(dtset.shifted_movie_path)
+                #%%
+                acq.voltage_signal_object.signal_extraction_object()
+
+                
+                
+                
+                
                 #%% do filtering and max images after manual motion correction
                 dtset.most_updated_caiman.check_motion_corrected_on_acid()
                 dtset.read_all_paths()
@@ -600,6 +616,7 @@ class TODO_Selection(tk.Tk):
                 #%%
                 acq.load_results_analysis(new_full_data=True) 
                 # acq.load_results_analysis(new_full_data=False) 
+                
                 analysis=acq.analysis_object
                 full_data=analysis.full_data
             
@@ -612,20 +629,20 @@ class TODO_Selection(tk.Tk):
                 
                 
                 #%% initial caiman and motion correct
-                chand_good_datasets=['SPKS','SPRE','SPRB']
+                chand_good_datasets=['SPKS','SPRE','SPRB','SPRM','SPRN','SPRZ']
                 int_good_datasets=['SPKG', 'SPOL','SPQZ','SPRA','SPQW','SPQX']
-                mousename=chand_good_datasets[2]
+                mousename=chand_good_datasets[3]
  
                 mouse_object=datamanaging.all_experimetal_mice_objects[mousename]
                 allacqs=mouse_object.all_mouse_acquisitions
  
                 pprint(list(allacqs.keys()))
                 # selectedaqposition = int(input('Choose Aq position.\n'))
-                selectedaqposition=6
+                selectedaqposition=7
                 #rafachandoptodatasetis  selectedaqposition=1
                 
                 #% getting acq
-                acq=allacqs[list(allacqs.keys())[selectedaqposition]]
+                acq=allacqs[list (allacqs.keys())[selectedaqposition]]
                 acq.get_all_database_info()
                 
                 calciumdatasets={ i:l for i,l in acq.all_datasets.items() if 'Green' in i}
@@ -642,19 +659,26 @@ class TODO_Selection(tk.Tk):
                 volt.voltage_signals_dictionary
                 database_acq_raw_path=Path(acq.acquisition_database_info.loc[0, 'AcquisitonRawPath']).resolve()
                 raw_dataset_path= Path(glob.glob(str(database_acq_raw_path)+'\**')[0])
+                dtset.open_dataset_directory()
 
+                #%%tesitng galois
                 
+                # dtset.galois_caiman()
                 #%% step by step ciman procesing
                 dtset.do_initial_caiman_extraction()
                 dtset.do_initial_kalman(dtset.initial_caiman.mc_onacid_path)
                 dtset.initial_caiman.load_results_object()
                 dtset.do_summary_images(dtset.gauss_path)
                 #%%
-                dtset.initial_caiman.CaimanResults_object.open_caiman_sorter()
+                # dtset.initial_caiman.CaimanResults_object.open_caiman_sorter()
                 dtset.read_all_paths() #this is to reload the caimanrsults oibject and add the onacid path.
                 dtset.load_dataset()
                 #%%
-                # dtset.do_deep_caiman()
+                new_param_dict={'nb':1,'movie_slice':np.arange(0,5000)}
+                new_param_dict={'nb':1}
+                new_param_dict={'epochs':2}
+
+                dtset.do_deep_caiman(new_param_dict)
                 dtset.read_all_paths() #this is to reload the caimanrsults oibject and add the onacid path.
                 dtset.load_dataset()
                 dtset.most_updated_caiman.check_caiman_files()
@@ -665,12 +689,8 @@ class TODO_Selection(tk.Tk):
             #%%
                 acq.load_metadata_slow_working_directories()
                 #%% gsig=4
-                new_param_dict={'nb':1,'movie_slice':np.arange(0,5000)}
-                new_param_dict={'nb':1}
-                new_param_dict={'epochs':2}
+               
 
-
-                dtset.do_deep_caiman(new_param_dict)
                 #%%
                 dtset.galois_caiman(new_param_dict)
                 
@@ -695,10 +715,36 @@ class TODO_Selection(tk.Tk):
                 sessionnames=['20220223','20220306','20220314','20220331','20220414']
                 
                 for session_name in sessionnames:
+                    
 
                     prairie_session=datamanaging.all_existing_sessions_database_objects[session_name]
                 # this is the celan up and org, this has to be done first
                     prairie_session.process_all_imaged_mice()      
+                    
+                    
+                #%% raw processing
+                session_name='20230709'
+                prairie_session= datamanaging.all_existing_sessions_not_database_objects[session_name]
+                
+                # this is the celan up and org, this has to be done first
+                prairie_session.process_all_imaged_mice()
+                
+
+                
+                for mouse_code in prairie_session.session_imaged_mice_codes:
+                    prairie_session.datamanagingobject.all_experimetal_mice_objects[mouse_code].raw_imaging_sessions_objects[session_name].raw_session_preprocessing()
+
+                    mouse_object=prairie_session.datamanagingobject.all_experimetal_mice_objects[mouse_code]
+                    session_object=mouse_object.raw_imaging_sessions_objects[session_name]
+                    mouse_object.get_all_mouse_raw_acquisitions_datasets(mouse_object.raw_imaging_sessions_objects)
+                    for dataset in mouse_object.all_raw_mouse_acquisitions_datasets.values():
+                        dataset.process_raw_dataset(forcing=True)
+                
+                #%%
+                dataset=list(mouse_object.all_raw_mouse_acquisitions_datasets.values())[2]
+                dataset.process_raw_dataset(forcing=True)
+
+                
                     
 #%% DATA ANALYSIS                  
         elif [todo for todo in self.selected_things_to_do if todo in self.things_to_do[12:-1]] :   
@@ -897,9 +943,12 @@ class TODO_Selection(tk.Tk):
 #%% DATA ANALYSIS FROM DATABASE
             elif 'do_data_analysis_from_database' in self.selected_things_to_do:
                 
+                self.destroy()
+                return
+                
                 # select mouse
                 mousenamesinter=['SPKG','SPHV']
-                mousenameschand=['SPKQ','SPKS','SPJZ','SPJF','SPJG','SPKU', 'SPKW','SPKY','SPRB']
+                mousenameschand=['SPKQ','SPKS','SPJZ','SPJF','SPJG','SPKU', 'SPKW','SPKY','SPRB','SPRM','SPRZ']
                 
                 #spKQ chandeliers plane1 18, 27, 121, 228
                 #spKQ chandeliers plane2 52(fist pass caiman)
@@ -913,18 +962,27 @@ class TODO_Selection(tk.Tk):
                 allacqs=mouse_object.all_mouse_acquisitions
                 pprint(list(allacqs.keys()))
                 # selectedaqposition = int(input('Choose Aq position.\n'))
-                selectedaqposition=[4,5,6]
-                # selectedaqposition=[1] #this is the manual analyais ne SPRB TEST
+                # selectedaqposition=[7,8,9,10,11]# this is for SPRM
+                
+                selectedaqposition=[2,6,7] #this fro sprz
+                # selectedaqposition=[6,10,17] #this ifor SPJZ three allen
+                # selectedaqposition=[10] #this ifor SPJZ o;nly allen B, ALlen A and Allen C still to be processed
+
 
                 
                 acqs=[allacqs[list(allacqs.keys())[i]] for i in selectedaqposition]
-
+               
                 
                 # %% get datasets
                 selected_analysis=[]
                 for i,aq in enumerate(acqs): 
+                    # dtset=aq.all_datasets[list(aq.all_datasets.keys())[1]]
+                    # dtset.most_updated_caiman.CaimanResults_object.open_caiman_sorter()
+                    
                     aq.get_all_database_info() 
-                    aq.load_results_analysis(new_full_data=True) 
+                    aq.load_results_analysis(new_full_data=False) 
+                    # aq.load_results_analysis(new_full_data=True) 
+
 
              
                     selected_analysis.append({'analysis':aq.analysis_object,'full_data':aq.analysis_object.full_data})
@@ -937,15 +995,30 @@ class TODO_Selection(tk.Tk):
                 self.to_return[5:]=[ mousename,  mouse_object , allacqs, selectedaqposition, acqs, analysis,full_data,selected_analysis]
                 
                 
+                
+                #%% combine optodrifting and opto info
+                tt=analysis.signals_object.signal_transitions
+                analysis.signals_object.extract_transitions_optodrift('VisStim', led_clipped=True, plot=False)
+                
+                
+                analysis.signals_object.optodrift_info
+                
+                optograting=analysis.acquisition_object.visstimdict['opto']['randomoptograting']
+
+
                 #%%
                 for i in range(len(selected_analysis)):
                     analysis=selected_analysis[i]['analysis']
                     full_data=selected_analysis[i]['full_data']
                     # analysis.review_aligned_signals_and_transitions()
                     analysis.photostim_stim_table_and_optanalysisrafatemp()
-                    
+                
+                 
+
+                
                 # analysis.manually_setting_opto_times_and_cells() # this is for the rafa analysi dataset
 
+              
                 
 #%% ANALYSIS EXPLORATION
 

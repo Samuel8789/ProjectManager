@@ -7,11 +7,11 @@ Created on Wed Apr 13 10:57:50 2022
 
 # requirements
 # check environemnet and anconda
-# check environemnet and anconda
+# check environemnet and ancondat
 # install miniconda
 
-# check gtihub tokeny
 
+# check gtihub tokeny
 # git
 # numpy
 # matplotlib
@@ -22,7 +22,7 @@ Created on Wed Apr 13 10:57:50 2022
 # conda install mamba 
 # mamba create -n caiman2 -c conda-forge caiman
 # mamba install -c conda-forge caiman
-# mamba activate caiman2
+# MAMBA ACTIVATE CAIMAN2
 # mamba install Spyder GitPython PyGithub mplcursors keyboard roifile
 # conda install pytables
 # pip install pandastable tkcalendar pyarrow XlsxWriter
@@ -30,7 +30,6 @@ Created on Wed Apr 13 10:57:50 2022
 # mamba install python=3.8
 # mamba install jinja2=3.0
 # mamba install spyder=5.1
-# pip install allensdkn
 # setx /M PATH "%PATH%;C:\Users\sp3660\AppData\Roaming\Python\Python38\Scripts"
 # mamba install tifffile==2024.4.8 BAD, very slow lots of siseeus 
 # caiman timeseries chanche compress= fro compression=
@@ -39,12 +38,13 @@ Created on Wed Apr 13 10:57:50 2022
 # pip install tifffile==0.12
 # cnat remove tifffile 2022.4.28 because it generate incosnsitencies
 
+ #  - conda-forge/noarch::nbconvert-core==6.5.0=pyhd8ed1ab_0
  # conda-forge/noarch::nbformat==5.3.0=pyhd8ed1ab_0
  #  - conda-forge/noarch::nbclient==0.6.0=pyhd8ed1ab_0
- #  - conda-forge/noarch::nbconvert-core==6.5.0=pyhd8ed1ab_0
  #  - conda-forge/noarch::nbconvert-pandoc==6.5.0=pyhd8ed1ab_0
  #  - conda-forge/noarch::nbconvert==6.5.0=pyhd8ed1ab_0
  #  - conda-forge/noarch::notebook==6.4.11=pyha770c72_0
+# pip install allensdkn
  #  - conda-forge/win-64::spyder==5.1.5=py38haa244fe_1
  #  - conda-forge/win-64::widgetsnbextension==3.6.0=py38haa244fe_0
  #  - conda-forge/noarch::ipywidgets==7.7.0=pyhd8ed1ab_0
@@ -98,6 +98,7 @@ small_laptop_ubuntu='samuel-XPS-13-9380'
 small_laptop_kali='samuel-XPS-13-9380'
 big_laptop_ubuntu='samuel-XPS-15-9560'
 big_laptop_arch='samuel-XPS-15-9560'
+newlab='sp3660-YusteLab'
 
 if platform == "win32":
     if socket.gethostname()==house_PC:
@@ -113,6 +114,9 @@ elif platform == "linux" or platform == "linux2":
         githubtoken_path='/home/samuel/Documents/Github/GitHubToken.txt'
         # Path('/home/samuel/Documents/Github/GitHubToken.txt')
         print('TO DO')
+    elif socket.gethostname()==newlab:
+        computer=newlab
+        githubtoken_path='/home/sp3660/Documents/Github/GitHubToken.txt'
 
 
 
