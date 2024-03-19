@@ -47,8 +47,18 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import animation 
 mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=["k", "r", "b",'g','y','c','m', 'tab:brown']) 
 
-sys.path.insert(0, r'C:\Users\sp3660\Documents\Github\LabNY\ny_lab\data_analysis')
+# sys.path.insert(0, r'C:\Users\sp3660\Documents\Github\LabNY\ny_lab\data_analysis')
+sys.path.insert(0, r'/home/sp3660/Documents/Github/LabNY/ny_lab/data_analysis')
+
 from jesusEnsemblesResults import JesusEnsemblesResults
+from termcolor import colored
+
+def print_colored_list(my_list,selected):
+    for i, item in enumerate(my_list):
+        if i in selected:
+            print(colored(item, 'green'))  # Print in red color
+        else:
+            print(item)
 
 
 
@@ -256,13 +266,13 @@ class TODO_Selection(tk.Tk):
      
             tt=data_set.get_roi_mask()
                 
-         #%%
+         #%% this is for plotting the cells
             import numpy as np
             from matplotlib import pyplot as plt
             from matplotlib.widgets import Slider
             import numpy.ma as ma
             from matplotlib.colors import Normalize
-            import matplotlib.cm as cm
+            import matplotlib.cm as cmm
             from matplotlib.patches import Rectangle
             # plt.rcParams["figure.figsize"] = [7.50, 3.50]
             plt.rcParams["figure.autolayout"] = True
@@ -300,7 +310,7 @@ class TODO_Selection(tk.Tk):
                 [['a)', 'b)','d)','f'], 
                  ['c)', 'c)','c)','c)'],
                  ['e','e','e','e']],)
-            my_cmap = cm.jet
+            my_cmap = cmm.jet
             my_cmap.set_under('k', alpha=0)
            
   
@@ -629,9 +639,9 @@ class TODO_Selection(tk.Tk):
                 
                 
                 #%% initial caiman and motion correct
-                chand_good_datasets=['SPKS','SPRE','SPRB','SPRM','SPRN','SPRZ']
+                chand_good_datasets=['SPKS','SPRE','SPRB','SPRM','SPRN','SPRZ','SPST','SPSM','SPSU']
                 int_good_datasets=['SPKG', 'SPOL','SPQZ','SPRA','SPQW','SPQX']
-                mousename=chand_good_datasets[3]
+                mousename=chand_good_datasets[-6]
  
                 mouse_object=datamanaging.all_experimetal_mice_objects[mousename]
                 allacqs=mouse_object.all_mouse_acquisitions
@@ -644,21 +654,20 @@ class TODO_Selection(tk.Tk):
                 #% getting acq
                 acq=allacqs[list (allacqs.keys())[selectedaqposition]]
                 acq.get_all_database_info()
-                
-                calciumdatasets={ i:l for i,l in acq.all_datasets.items() if 'Green' in i}
-
-                
-                pprint(calciumdatasets)
-                selecteddtsetposition=0
-                
-                #% getting acq
-                dtset=calciumdatasets[list(calciumdatasets)[selecteddtsetposition]]
+               
                 acq.load_all()
                 volt=acq.voltage_signal_object
                 volt.voltage_signals_dictionary_daq
                 volt.voltage_signals_dictionary
-                database_acq_raw_path=Path(acq.acquisition_database_info.loc[0, 'AcquisitonRawPath']).resolve()
-                raw_dataset_path= Path(glob.glob(str(database_acq_raw_path)+'\**')[0])
+                database_acq_raw_path=Path(datamanaging.transform_databasepath_tolinux(acq.acquisition_database_info.loc[0, 'AcquisitonRawPath'])).resolve()
+                raw_dataset_path= Path(glob.glob(str(database_acq_raw_path)+os.sep+'**')[0])
+                
+                 
+                calciumdatasets={ i:l for i,l in acq.all_datasets.items() if 'Green' in i}
+                pprint(calciumdatasets)
+                selecteddtsetposition=0         
+                #% getting acq
+                dtset=calciumdatasets[list(calciumdatasets)[selecteddtsetposition]]
                 dtset.open_dataset_directory()
 
                 #%%tesitng galois
@@ -667,6 +676,9 @@ class TODO_Selection(tk.Tk):
                 #%% step by step ciman procesing
                 dtset.do_initial_caiman_extraction()
                 dtset.do_initial_kalman(dtset.initial_caiman.mc_onacid_path)
+                dtset.read_all_paths() #this is to reload the caimanrsults oibject and add the onacid path.
+                dtset.do_initial_kalman(dtset.mc_onacid_path)
+
                 dtset.initial_caiman.load_results_object()
                 dtset.do_summary_images(dtset.gauss_path)
                 #%%
@@ -674,9 +686,10 @@ class TODO_Selection(tk.Tk):
                 dtset.read_all_paths() #this is to reload the caimanrsults oibject and add the onacid path.
                 dtset.load_dataset()
                 #%%
+                
                 new_param_dict={'nb':1,'movie_slice':np.arange(0,5000)}
                 new_param_dict={'nb':1}
-                new_param_dict={'epochs':2}
+                new_param_dict={'epochs':1,'K':200, 'gSig':(5,5)}
 
                 dtset.do_deep_caiman(new_param_dict)
                 dtset.read_all_paths() #this is to reload the caimanrsults oibject and add the onacid path.
@@ -945,34 +958,63 @@ class TODO_Selection(tk.Tk):
                 
                 self.destroy()
                 return
-                
+           
                 # select mouse
                 mousenamesinter=['SPKG','SPHV']
-                mousenameschand=['SPKQ','SPKS','SPJZ','SPJF','SPJG','SPKU', 'SPKW','SPKY','SPRB','SPRM','SPRZ']
-                
+                mousenameschand=['SPKQ','SPKS','SPJZ','SPJF','SPJG','SPKU', 'SPKW','SPKY','SPRB','SPRM','SPRZ','SPSU','SPSM']                
                 #spKQ chandeliers plane1 18, 27, 121, 228
                 #spKQ chandeliers plane2 52(fist pass caiman)
- 
-                # mousename=mousenamesinter[0]
-                mousename=mousenameschand[-1]
-
-                mouse_object=datamanaging.all_experimetal_mice_objects[mousename]
+            # INTERNERUIN
+                #ALLEN
+                #LED OPTO
+                #2p OPTO
                 
-                # select aquisition
-                allacqs=mouse_object.all_mouse_acquisitions
-                pprint(list(allacqs.keys()))
-                # selectedaqposition = int(input('Choose Aq position.\n'))
-                # selectedaqposition=[7,8,9,10,11]# this is for SPRM
-                
-                selectedaqposition=[2,6,7] #this fro sprz
-                # selectedaqposition=[6,10,17] #this ifor SPJZ three allen
-                # selectedaqposition=[10] #this ifor SPJZ o;nly allen B, ALlen A and Allen C still to be processed
+            # CHandelier
+                #LED OPTO
+                    # Short dRIFT final
+                known_mouse_aq_pair=[[mousenameschand[12],mousenameschand[10]],[[0],[2]]] #ALL LED short drift SPSM, SPRZ
+                known_mouse_aq_pair=[[mousenameschand[10]],[[2]]]   #LED short drift SPRZ
+                known_mouse_aq_pair=[[mousenameschand[12]],[[0]]]   #LED short drift SPSM
+
+                    # Short dRIFT BLUE
+                known_mouse_aq_pair=[[mousenameschand[9]],[[7]]]   #SPRM   
+
+                    # sPONT blUE
+                known_mouse_aq_pair=[[mousenameschand[9]],[[6]]]    #SPRM   
+
+                    
+                #2P OPTO
+                    # short drift
+                known_mouse_aq_pair=[[mousenameschand[9]],[[8,9,10,11]]]    #SPRM   
+                known_mouse_aq_pair=[[mousenameschand[10]],[[6,7]]]  #2p short drift SPRZ
 
 
+                #allen
+                known_mouse_aq_pair=[[mousenameschand[2]],[[6,10,17]]]  #this ifor SPJZ three allen
+                known_mouse_aq_pair=[[mousenameschand[2]],[[10]]]  #this ifor SPJZ ALlen B
+
                 
-                acqs=[allacqs[list(allacqs.keys())[i]] for i in selectedaqposition]
+
+
+
+                mousenames,selectedaqposition=known_mouse_aq_pair
+
+                selected_acqs=[]
+                for l,mousename in enumerate(mousenames):
+                    mouse_object=datamanaging.all_experimetal_mice_objects[mousename]
+                    selected_acqs.append(mouse_object.all_mouse_acquisitions)
+                    pprint(list(mouse_object.all_mouse_acquisitions.keys()))
+                    
+                    print_colored_list(list(mouse_object.all_mouse_acquisitions.keys()),selectedaqposition[l])
+
+                assert(len(selected_acqs)==len(selectedaqposition))
+                acqs=[]
+                for j, mouse in enumerate(selectedaqposition):
+                    for i in mouse:
+                        acqs.append(selected_acqs[j][list(selected_acqs[j].keys())[i]])
+                        
+     
                
-                
                 # %% get datasets
                 selected_analysis=[]
                 for i,aq in enumerate(acqs): 
@@ -980,8 +1022,8 @@ class TODO_Selection(tk.Tk):
                     # dtset.most_updated_caiman.CaimanResults_object.open_caiman_sorter()
                     
                     aq.get_all_database_info() 
-                    aq.load_results_analysis(new_full_data=False) 
-                    # aq.load_results_analysis(new_full_data=True) 
+                    # aq.load_results_analysis(new_full_data=False) 
+                    aq.load_results_analysis(new_full_data=True) 
 
 
              
@@ -997,6 +1039,7 @@ class TODO_Selection(tk.Tk):
                 
                 
                 #%% combine optodrifting and opto info
+                # aq.load_vis_stim_info()
                 tt=analysis.signals_object.signal_transitions
                 analysis.signals_object.extract_transitions_optodrift('VisStim', led_clipped=True, plot=False)
                 

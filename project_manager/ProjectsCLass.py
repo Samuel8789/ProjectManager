@@ -21,6 +21,7 @@ from platform import system
 import git
 from git import Repo
 from github import Github
+import glob
 
 class Project():
       
@@ -76,11 +77,24 @@ class Project():
         if Project.platform=='win32':
             available_drives = ['%s:' % d for d in string.ascii_uppercase if os.path.exists('%s:' % d)]
         elif Project.platform=='linux':
-            available_drives=['/']
+            available_drives0=['/']
             print('doing')
+            mountpath=r'/media/sp3660'
+            mountpath2=r'/mnt'
+            available_drives1=glob.glob(mountpath+'/**')
+            good_drives1=[]
+            for drive in available_drives1:
+                try:
+                    os.listdir(drive)
+                    good_drives1.append(drive)
+                except:
+                    print('mounting error')
+            available_drives2=glob.glob(mountpath2+'/**')
+            available_drives=available_drives0+good_drives1+[dr for dr in available_drives2 if '-8774-4ccf-8efb-700b593' in dr]
+
         return available_drives
-      
-            
+           
+
              
     @classmethod    
     def check_documents_path(self):   
@@ -93,7 +107,7 @@ class Project():
             doc_path=Path(buf.value)
           
         elif Project.platform=='linux':
-            doc_path=Path('/home/samuel/Documents')
+            doc_path=Path('/home/sp3660/Documents')
 
         return doc_path
       
