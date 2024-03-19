@@ -107,7 +107,9 @@ class Project():
             doc_path=Path(buf.value)
           
         elif Project.platform=='linux':
-            doc_path=Path('/home/sp3660/Documents')
+            doc_path=Path(os.path.join(os.path.expanduser('~'),'Documents'))
+            
+            
 
         return doc_path
       
