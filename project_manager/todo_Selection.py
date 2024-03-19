@@ -48,7 +48,7 @@ from matplotlib import animation
 mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=["k", "r", "b",'g','y','c','m', 'tab:brown']) 
 
 # sys.path.insert(0, r'C:\Users\sp3660\Documents\Github\LabNY\ny_lab\data_analysis')
-sys.path.insert(0, r'/home/sp3660/Documents/Github/LabNY/ny_lab/data_analysis')
+sys.path.insert(0, ros.path.join(os.path.expanduser('~'),r'Documents/Github/LabNY/ny_lab/data_analysis'))
 
 from jesusEnsemblesResults import JesusEnsemblesResults
 from termcolor import colored

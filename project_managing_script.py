@@ -113,8 +113,7 @@ elif platform == "linux" or platform == "linux2":
         print('TO DO')
     elif socket.gethostname()==newlab:
         computer=newlab
-        githubtoken_path='/home/sp3660/Documents/Github/GitHubToken.txt'
-
+        githubtoken_path=os.path.join(os.path.expanduser('~'),r'Documents/Github/GitHubToken.txt')
 
 """
 # current errors and excepions
