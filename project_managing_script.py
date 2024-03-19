@@ -2,20 +2,17 @@
 """
 Created on Wed Apr 13 10:57:50 2022
 
-@author: sp3660
+@author: sp3660ll
 """
 
 # requirements
-# check environemnet and anconda
 # check environemnet and ancondat
 # install miniconda
-
 
 # check gtihub tokeny
 # git
 # numpy
 # matplotlib
-
 # conda update conda
 # conda update --all
 # conda config --set channel_priority flexible
@@ -117,7 +114,6 @@ elif platform == "linux" or platform == "linux2":
     elif socket.gethostname()==newlab:
         computer=newlab
         githubtoken_path='/home/sp3660/Documents/Github/GitHubToken.txt'
-
 
 
 """
