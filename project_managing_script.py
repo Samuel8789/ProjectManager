@@ -23,7 +23,7 @@ Created on Wed Apr 13 10:57:50 2022
 # mamba install Spyder GitPython PyGithub mplcursors keyboard roifile
 # conda install pytables
 # pip install pandastable tkcalendar pyarrow XlsxWriter
-# conda install markupsafe=2.0.1
+# conda instalpl markupsafe=2.0.1
 # mamba install python=3.8
 # mamba install jinja2=3.0
 # mamba install spyder=5.1
