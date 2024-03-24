@@ -966,7 +966,7 @@ class TODO_Selection(tk.Tk):
                 #spKQ chandeliers plane2 52(fist pass caiman)
             # INTERNERUIN
                 #ALLEN
-                #LED OPTO
+                #LED OPTOl
                 #2p OPTO
                 
             # CHandelier
