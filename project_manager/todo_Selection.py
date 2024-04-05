@@ -639,16 +639,16 @@ class TODO_Selection(tk.Tk):
                 
                 
                 #%% initial caiman and motion correct
-                chand_good_datasets=['SPKS','SPRE','SPRB','SPRM','SPRN','SPRZ','SPST','SPSM','SPSU']
+                chand_good_datasets=['SPKS','SPRE','SPRB','SPRM','SPRN','SPRZ','SPST','SPSM','SPSU','SPSX','SPSZ']
                 int_good_datasets=['SPKG', 'SPOL','SPQZ','SPRA','SPQW','SPQX']
-                mousename=chand_good_datasets[-6]
+                mousename=chand_good_datasets[-2]
  
                 mouse_object=datamanaging.all_experimetal_mice_objects[mousename]
                 allacqs=mouse_object.all_mouse_acquisitions
  
                 pprint(list(allacqs.keys()))
                 # selectedaqposition = int(input('Choose Aq position.\n'))
-                selectedaqposition=7
+                selectedaqposition=0
                 #rafachandoptodatasetis  selectedaqposition=1
                 
                 #% getting acq
@@ -961,7 +961,7 @@ class TODO_Selection(tk.Tk):
            
                 # select mouse
                 mousenamesinter=['SPKG','SPHV']
-                mousenameschand=['SPKQ','SPKS','SPJZ','SPJF','SPJG','SPKU', 'SPKW','SPKY','SPRB','SPRM','SPRZ','SPSU','SPSM']                
+                mousenameschand=['SPKQ','SPKS','SPJZ','SPJF','SPJG','SPKU', 'SPKW','SPKY','SPRB','SPRM','SPRZ','SPSU','SPSM','SPSX','SPSZ']                
                 #spKQ chandeliers plane1 18, 27, 121, 228
                 #spKQ chandeliers plane2 52(fist pass caiman)
             # INTERNERUIN
@@ -975,6 +975,10 @@ class TODO_Selection(tk.Tk):
                 known_mouse_aq_pair=[[mousenameschand[12],mousenameschand[10]],[[0],[2]]] #ALL LED short drift SPSM, SPRZ
                 known_mouse_aq_pair=[[mousenameschand[10]],[[2]]]   #LED short drift SPRZ
                 known_mouse_aq_pair=[[mousenameschand[12]],[[0]]]   #LED short drift SPSM
+                known_mouse_aq_pair=[[mousenameschand[13]],[[0]]]   #LED short drift SPSX
+                known_mouse_aq_pair=[[mousenameschand[14]],[[0]]]   #LED short drift SPSZ
+                known_mouse_aq_pair=[[mousenameschand[13],mousenameschand[14]],[[0],[0]]] #ALL LED short drift SPSM, SPRZ
+
 
                     # Short dRIFT BLUE
                 known_mouse_aq_pair=[[mousenameschand[9]],[[7]]]   #SPRM   
