@@ -39,11 +39,11 @@ class Project():
         Project.documents_path=Project.check_documents_path()        
         Project.main_drive=Project.documents_path.parts[0]       
         for drive in Project.drives:
-            if drive not in Project.main_drive and 'H' not in drive:
-                if Project.platform=='win32':
-                    Project.all_paths_for_this_system[drive]=os.path.join(drive,'\Projects')
-                elif Project.platform=='linux':
-                    Project.all_paths_for_this_system[drive]=os.path.join(drive,'Projects')
+            # if drive not in Project.main_drive and 'H' not in drive:
+            if Project.platform=='win32':
+                Project.all_paths_for_this_system[drive]=os.path.join(drive,'\Projects')
+            elif Project.platform=='linux':
+                Project.all_paths_for_this_system[drive]=os.path.join(drive,'Projects')
 
         Project.dropbox_path=Project.check_dropbox_path()
            

@@ -975,8 +975,8 @@ class TODO_Selection(tk.Tk):
                 known_mouse_aq_pair=[[mousenameschand[12],mousenameschand[10]],[[0],[2]]] #ALL LED short drift SPSM, SPRZ
                 known_mouse_aq_pair=[[mousenameschand[10]],[[2]]]   #LED short drift SPRZ
                 known_mouse_aq_pair=[[mousenameschand[12]],[[0]]]   #LED short drift SPSM
-                known_mouse_aq_pair=[[mousenameschand[13]],[[0]]]   #LED short drift SPSX
-                known_mouse_aq_pair=[[mousenameschand[14]],[[0]]]   #LED short drift SPSZ
+                known_mouse_aq_pair=[[mousenameschand[13]],[[0]]]   #LED short drift SPSX No opto responses
+                known_mouse_aq_pair=[[mousenameschand[14]],[[0]]]   #LED short drift SPSZ Control :LED
                 known_mouse_aq_pair=[[mousenameschand[13],mousenameschand[14]],[[0],[0]]] #ALL LED short drift SPSM, SPRZ
 
 
@@ -999,7 +999,7 @@ class TODO_Selection(tk.Tk):
 
                 
 
-
+#%%
 
                 mousenames,selectedaqposition=known_mouse_aq_pair
 
@@ -1026,8 +1026,8 @@ class TODO_Selection(tk.Tk):
                     # dtset.most_updated_caiman.CaimanResults_object.open_caiman_sorter()
                     
                     aq.get_all_database_info() 
-                    # aq.load_results_analysis(new_full_data=False) 
-                    aq.load_results_analysis(new_full_data=True) 
+                    aq.load_results_analysis(new_full_data=False) 
+                    # aq.load_results_analysis(new_full_data=True) 
 
 
              
