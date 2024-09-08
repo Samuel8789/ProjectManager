@@ -51,14 +51,6 @@ mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=["k", "r", "b",'g','y','c','m
 sys.path.insert(0, os.path.join(os.path.expanduser('~'),r'Documents/Github/LabNY/ny_lab/data_analysis'))
 
 from jesusEnsemblesResults import JesusEnsemblesResults
-from termcolor import colored
-
-def print_colored_list(my_list,selected):
-    for i, item in enumerate(my_list):
-        if i in selected:
-            print(colored(item, 'green'))  # Print in red color
-        else:
-            print(item)
 
 
 
@@ -146,7 +138,9 @@ class TODO_Selection(tk.Tk):
             self.destroy()
             return
             allen.set_up_monitor( screen_size=[750,1280], lenght=37.7)
-            # allen.get_visual_templates()
+            #%%
+            allen.get_visual_templates()
+            #%%
             # allen.get_gratings()
             # allen.get_drifting_gratings()
             allen.get_selection_options()
@@ -500,6 +494,12 @@ class TODO_Selection(tk.Tk):
 
                 self.destroy()
                 return
+#%%
+                #this is to pdate slow and working storage after i chan ge dand finnalt stablized computer
+                datamanaging.update_mouse_slow_storages()
+#%%
+                #hius is for changing the letter for teh data permanet diskj after I tarnsfer everythion to internal ssd
+                datamanaging.update_drive_letter_of_permanent_paths()
 
                 # this was done for the disk change i think
                 # datamanaging.update_pre_process_slow_data_structure(update=True)
@@ -958,7 +958,15 @@ class TODO_Selection(tk.Tk):
                 
                 self.destroy()
                 return
-           
+                from termcolor import colored
+                def print_colored_list(my_list,selected):
+                    for i, item in enumerate(my_list):
+                        if i in selected:
+                            print(colored(item, 'red'))  # Print in red color
+                        else:
+                            print(item)
+
+
                 # select mouse
                 mousenamesinter=['SPKG','SPHV']
                 mousenameschand=['SPKQ','SPKS','SPJZ','SPJF','SPJG','SPKU', 'SPKW','SPKY','SPRB','SPRM','SPRZ','SPSU','SPSM','SPSX','SPSZ']                
@@ -977,10 +985,10 @@ class TODO_Selection(tk.Tk):
                 known_mouse_aq_pair=[[mousenameschand[12]],[[0]]]   #LED short drift SPSM
                 known_mouse_aq_pair=[[mousenameschand[13]],[[0]]]   #LED short drift SPSX No opto responses
                 known_mouse_aq_pair=[[mousenameschand[14]],[[0]]]   #LED short drift SPSZ Control :LED
-                known_mouse_aq_pair=[[mousenameschand[13],mousenameschand[14]],[[0],[0]]] #ALL LED short drift SPSM, SPRZ
+                known_mouse_aq_pair=[[mousenameschand[13],mousenameschand[14]],[[0],[0]]] #ALL LED short drift  SPSX, SPSZ
 
 
-                    # Short dRIFT BLUE
+                # Short dRIFT BLUE
                 known_mouse_aq_pair=[[mousenameschand[9]],[[7]]]   #SPRM   
 
                     # sPONT blUE
@@ -1026,8 +1034,9 @@ class TODO_Selection(tk.Tk):
                     # dtset.most_updated_caiman.CaimanResults_object.open_caiman_sorter()
                     
                     aq.get_all_database_info() 
-                    aq.load_results_analysis(new_full_data=False) 
-                    # aq.load_results_analysis(new_full_data=True) 
+                    # aq.load_results_analysis(new_full_data=False) 
+                    
+                    aq.load_results_analysis(new_full_data=True)  
 
 
              

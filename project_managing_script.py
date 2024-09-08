@@ -5,7 +5,7 @@ Created on Wed Apr 13 10:57:50 2022
 @author: sp3660
 """
 
-# requirements
+    # requirements
 # check environemnet and ancondat
 # install miniconda
 
