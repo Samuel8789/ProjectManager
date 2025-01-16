@@ -1034,12 +1034,9 @@ class TODO_Selection(tk.Tk):
                     # dtset.most_updated_caiman.CaimanResults_object.open_caiman_sorter()
                     
                     aq.get_all_database_info() 
-                    # aq.load_results_analysis(new_full_data=False) 
+                    aq.load_results_analysis(new_full_data=False) 
                     
-                    aq.load_results_analysis(new_full_data=True)  
-
-
-             
+                    # aq.load_results_analysis(new_full_data=True)       
                     selected_analysis.append({'analysis':aq.analysis_object,'full_data':aq.analysis_object.full_data})
 
                     print(aq.aquisition_name)
@@ -1047,7 +1044,7 @@ class TODO_Selection(tk.Tk):
                 analysis=selected_analysis[0]['analysis']
                 full_data=selected_analysis[0]['full_data']
                 
-                self.to_return[5:]=[ mousename,  mouse_object , allacqs, selectedaqposition, acqs, analysis,full_data,selected_analysis]
+                # self.to_return[5:]=[ mousename,  mouse_object , allacqs, selectedaqposition, acqs, analysis,full_data,selected_analysis]
                 
                 
                 
