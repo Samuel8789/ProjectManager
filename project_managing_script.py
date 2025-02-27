@@ -90,9 +90,9 @@ from project_manager.todo_Selection import TODO_Selection
 
 # SET GITHUB TOKEN PATH
 house_PC='DESKTOP-V1MT0U5'
-lab_PC='DESKTOP-ETJV9PS'
+lab_PC='YUSTELABMSIPC01'
 old_lab_PC='DESKTOP-OKLQSQS'
-
+#lab_PC='DESKTOP-ETJV9PS' thois was before jonathan saved the user and changed opc name
 
 small_laptop_ubuntu='samuel-XPS-13-9380'
 small_laptop_kali='samuel-XPS-13-9380'
